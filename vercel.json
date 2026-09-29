@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/account.js" },
+    { "source": "/productos", "destination": "/productos.html" },
+    { "source": "/servicios", "destination": "/servicios.html" },
+    { "source": "/carrito", "destination": "/carrito.html" },
+    { "source": "/cuenta", "destination": "/cuenta.html" },
+    { "source": "/admin", "destination": "/admin.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" }
+      ]
+    }
+  ]
+}

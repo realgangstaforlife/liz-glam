@@ -1,0 +1,17 @@
+{
+  "name": "liz-glam",
+  "version": "1.0.0",
+  "description": "Plataforma de Maquillaje Profesional y Servicios de Belleza LizGlam",
+  "main": "api/account.js",
+  "scripts": {
+    "start": "node api/account.js",
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == "admin@lizglam.happycorner.top" ||
+        request.auth.token.role == "admin" ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
+      );
+    }
+
+    // Public read for Products, Services & Combos; Admin write
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /combos/{comboId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create, update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Saved Carts (user specific)
+    match /saved_carts/{cartId} {
+      allow read, write: if isSignedIn() && (
+        resource == null || resource.data.user_id == request.auth.uid || isAdmin()
+      );
+    }
+
+    // Orders (Instagram pre-orders logged for tracking)
+    match /orders/{orderId} {
+      allow create: if true; // Guests & Users can log pre-orders for Instagram checkout
+      allow read, update, delete: if isAdmin() || (isSignedIn() && resource.data.user_id == request.auth.uid);
+    }
+  }
+}
