@@ -67,6 +67,8 @@ class LizGlamApp {
       if (servRes.services) this.services = servRes.services;
       if (comboRes.combos) this.combos = comboRes.combos;
 
+      this.renderNewIn();
+      this.renderBestSellers();
       this.renderProducts();
       this.renderServices();
       this.renderCombos();
@@ -105,23 +107,33 @@ class LizGlamApp {
     const banner = this.banners[index];
 
     const heroSection = document.querySelector('.hero');
+    const heroContent = document.querySelector('.hero-content');
     const heroTitle = document.querySelector('.hero-title');
     const heroDesc = document.querySelector('.hero-desc');
     const heroTag = document.querySelector('.hero-tag');
 
     if (banner.image_url && heroSection) {
-      heroSection.style.background = `linear-gradient(135deg, rgba(91,86,77,0.7) 0%, rgba(138,68,53,0.4) 100%), url('${banner.image_url}') center/cover no-repeat`;
+      const hasText = (banner.title && banner.title.trim()) || (banner.subtitle && banner.subtitle.trim()) || (banner.desc && banner.desc.trim());
+      if (hasText) {
+        heroSection.style.background = `linear-gradient(135deg, rgba(28,23,24,0.4) 0%, rgba(91,86,77,0.3) 100%), url('${banner.image_url}') center/cover no-repeat`;
+        if (heroContent) heroContent.style.display = 'block';
+        if (banner.title && heroTitle) heroTitle.textContent = banner.title;
+        if (banner.desc && heroDesc) heroDesc.textContent = banner.desc;
+        if (banner.subtitle && heroTag) heroTag.textContent = banner.subtitle;
+      } else {
+        // Pure image banner without text overlay
+        heroSection.style.background = `url('${banner.image_url}') center/cover no-repeat`;
+        if (heroContent) heroContent.style.display = 'none';
+      }
     }
-    if (banner.title && heroTitle) heroTitle.textContent = banner.title;
-    if (banner.desc && heroDesc) heroDesc.textContent = banner.desc;
-    if (banner.subtitle && heroTag) heroTag.textContent = banner.subtitle;
 
     // Render Banner Control Dots
     const dotsContainer = document.getElementById('heroBannerDots');
     if (dotsContainer && this.banners.length > 1) {
       dotsContainer.innerHTML = this.banners.map((b, i) => `
         <button onclick="window.lizGlamApp.renderBanner(${i})" 
-          style="width: 12px; height: 12px; border-radius: 50%; background: ${i === index ? '#FFF' : 'rgba(255,255,255,0.4)'}; border: none; cursor: pointer; transition: all 0.3s;">
+          style="width: 12px; height: 12px; border-radius: 50%; background: ${i === index ? '#FFF' : 'rgba(255,255,255,0.4)'}; border: none; cursor: pointer; transition: all 0.3s;"
+          aria-label="Banner ${i + 1}">
         </button>
       `).join('');
     }
@@ -249,6 +261,73 @@ class LizGlamApp {
     if (shadeLabel) shadeLabel.textContent = `Tono: ${shadeName}`;
   }
 
+  createProductCardHtml(product, badgeText = null) {
+    const shades = product.shades || [];
+    const hasShades = shades.length > 0;
+    const currentShade = this.selectedShades[product.id] || (hasShades ? shades[0].name : '');
+    const badge = badgeText || product.category;
+
+    const badgeStyle = badgeText === 'NEW IN' 
+      ? 'background: var(--text-main); color: #FFF;' 
+      : (badgeText === 'BEST SELLER' ? 'background: var(--rose-gold-dark); color: #FFF;' : '');
+
+    return `
+      <div class="product-card">
+        <div class="product-img-wrapper">
+          <img src="${product.image_url}" alt="${product.name}" class="product-img" loading="lazy">
+          <span class="product-badge" style="${badgeStyle}">${badge}</span>
+        </div>
+        <div class="product-content">
+          <div class="product-category">LIZGLAM BEAUTY</div>
+          <h3 class="product-title">${product.name}</h3>
+          <p class="product-desc">${product.description || ''}</p>
+
+          ${hasShades ? `
+            <div style="margin-bottom: 0.85rem;">
+              <div id="selectedShadeLabel_${product.id}" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.35rem; font-weight: 500;">
+                Tono: ${currentShade}
+              </div>
+              <div style="display: flex; gap: 0.4rem; align-items: center;">
+                ${shades.map(s => `
+                  <button type="button" 
+                    onclick="window.lizGlamApp.selectShade('${product.id}', '${s.name}')" 
+                    class="shade-dot-${product.id}"
+                    data-shade="${s.name}"
+                    title="${s.name}"
+                    style="width: 20px; height: 20px; border-radius: 50%; background-color: ${s.hex || '#C77B89'}; border: ${s.name === currentShade ? '2px solid #5B564D' : '1px solid #E2DFDC'}; cursor: pointer; transition: transform 0.2s;">
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="product-price-row">
+            <div class="product-price">${formatCOP(product.price)}</div>
+            <button onclick="window.lizGlamApp.addToCart('${product.id}', 'product')" class="btn btn-sm btn-primary">
+              <i class="bi bi-bag-plus"></i> Agregar
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  renderNewIn() {
+    const grid = document.getElementById('newInGrid');
+    if (!grid) return;
+    const newItems = this.products.slice(0, 4);
+    if (newItems.length === 0) return;
+    grid.innerHTML = newItems.map(p => this.createProductCardHtml(p, 'NEW IN')).join('');
+  }
+
+  renderBestSellers() {
+    const grid = document.getElementById('bestSellersGrid');
+    if (!grid) return;
+    const bestItems = [...this.products].reverse().slice(0, 4);
+    if (bestItems.length === 0) return;
+    grid.innerHTML = bestItems.map(p => this.createProductCardHtml(p, 'BEST SELLER')).join('');
+  }
+
   renderProducts(list = this.products) {
     const grid = document.getElementById('productGrid');
     if (!grid) return;
@@ -263,51 +342,7 @@ class LizGlamApp {
       return;
     }
 
-    grid.innerHTML = list.map(product => {
-      const shades = product.shades || [];
-      const hasShades = shades.length > 0;
-      const currentShade = this.selectedShades[product.id] || (hasShades ? shades[0].name : '');
-
-      return `
-        <div class="product-card">
-          <div class="product-img-wrapper">
-            <img src="${product.image_url}" alt="${product.name}" class="product-img" loading="lazy">
-            <span class="product-badge">${product.category}</span>
-          </div>
-          <div class="product-content">
-            <div class="product-category">LIZGLAM BEAUTY</div>
-            <h3 class="product-title">${product.name}</h3>
-            <p class="product-desc">${product.description || ''}</p>
-
-            ${hasShades ? `
-              <div style="margin-bottom: 0.85rem;">
-                <div id="selectedShadeLabel_${product.id}" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.35rem; font-weight: 500;">
-                  Tono: ${currentShade}
-                </div>
-                <div style="display: flex; gap: 0.4rem; align-items: center;">
-                  ${shades.map(s => `
-                    <button type="button" 
-                      onclick="window.lizGlamApp.selectShade('${product.id}', '${s.name}')" 
-                      class="shade-dot-${product.id}"
-                      data-shade="${s.name}"
-                      title="${s.name}"
-                      style="width: 20px; height: 20px; border-radius: 50%; background-color: ${s.hex || '#C77B89'}; border: ${s.name === currentShade ? '2px solid #5B564D' : '1px solid #E2DFDC'}; cursor: pointer; transition: transform 0.2s;">
-                    </button>
-                  `).join('')}
-                </div>
-              </div>
-            ` : ''}
-
-            <div class="product-price-row">
-              <div class="product-price">${formatCOP(product.price)}</div>
-              <button onclick="window.lizGlamApp.addToCart('${product.id}', 'product')" class="btn btn-sm btn-primary">
-                <i class="bi bi-bag-plus"></i> Agregar
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
+    grid.innerHTML = list.map(product => this.createProductCardHtml(product)).join('');
   }
 
   renderServices() {

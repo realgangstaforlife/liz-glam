@@ -55,12 +55,12 @@
   </nav>
 
   <!-- Hero Carousel Section -->
-  <section class="hero" style="position: relative;">
-    <div class="container hero-content">
-      <span class="hero-tag">Cosméticos & Estudio de Maquillaje</span>
+  <section class="hero" style="position: relative; min-height: 480px; display: flex; align-items: center; justify-content: center; transition: background 0.6s ease;">
+    <div class="container hero-content" style="text-align: center;">
+      <span class="hero-tag">COSMÉTICOS & ESTUDIO DE MAQUILLAJE</span>
       <h1 class="hero-title font-serif">Resalta tu Belleza Natural con Elegancia</h1>
       <p class="hero-desc">Explora nuestra colección exclusiva de cosméticos profesionales y reserva experiencias de maquillaje de alto impacto.</p>
-      <div class="hero-btns">
+      <div class="hero-btns" style="justify-content: center; margin-top: 1.5rem;">
         <a href="/productos" class="btn btn-primary">
           <i class="bi bi-bag-heart"></i> Explorar Tienda
         </a>
@@ -75,45 +75,78 @@
   </section>
 
   <!-- Main Content Container -->
-  <main class="container" style="padding-top: 4rem;">
+  <main class="container" style="padding-top: 3.5rem;">
 
-    <!-- Category Filters -->
-    <div class="category-filter">
-      <button onclick="window.lizGlamApp.setCategory('all')" class="filter-pill active" data-category="all">Todos</button>
-      <button onclick="window.lizGlamApp.setCategory('bases')" class="filter-pill" data-category="bases">Bases</button>
-      <button onclick="window.lizGlamApp.setCategory('labiales')" class="filter-pill" data-category="labiales">Labiales</button>
-      <button onclick="window.lizGlamApp.setCategory('sombras')" class="filter-pill" data-category="sombras">Sombras</button>
-      <button onclick="window.lizGlamApp.setCategory('rubores')" class="filter-pill" data-category="rubores">Rubores</button>
-      <button onclick="window.lizGlamApp.setCategory('brochas')" class="filter-pill" data-category="brochas">Brochas</button>
-    </div>
-
-    <!-- Products Catalog Grid -->
-    <section style="margin-bottom: 5rem;">
-      <div class="section-title">
-        <span>COLECCIÓN EXCLUSIVA</span>
-        <h2>Productos Destacados</h2>
+    <!-- SECTION 1: NEW IN (Novedades) -->
+    <section style="margin-bottom: 4.5rem;">
+      <div class="section-title" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+        <div>
+          <span>LO MÁS RECIENTE</span>
+          <h2 style="margin-bottom: 0;">NEW IN</h2>
+        </div>
+        <a href="/productos" class="btn btn-sm btn-outline-rose">
+          Ver Todo <i class="bi bi-arrow-right"></i>
+        </a>
       </div>
+      <div id="newInGrid" class="product-grid">
+        <!-- Loaded dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- SECTION 2: BEST SELLERS (Más Vendidos) -->
+    <section style="margin-bottom: 4.5rem; background: var(--bg-alt); padding: 3rem 2rem; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
+      <div class="section-title" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+        <div>
+          <span>LOS FAVORITOS DE NUESTRAS CLIENTAS</span>
+          <h2 style="margin-bottom: 0;">BEST SELLERS</h2>
+        </div>
+        <a href="/productos" class="btn btn-sm btn-primary">
+          Explorar Catálogo <i class="bi bi-bag-heart"></i>
+        </a>
+      </div>
+      <div id="bestSellersGrid" class="product-grid">
+        <!-- Loaded dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- SECTION 3: CATÁLOGO COMPLETO Y CATEGORÍAS -->
+    <section style="margin-bottom: 4.5rem;">
+      <div class="section-title">
+        <span>EXPLORA NUESTRO PORTAFOLIO</span>
+        <h2>Catálogo de Productos</h2>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="category-filter" style="margin-bottom: 2rem;">
+        <button onclick="window.lizGlamApp.setCategory('all')" class="filter-pill active" data-category="all">Todos</button>
+        <button onclick="window.lizGlamApp.setCategory('bases')" class="filter-pill" data-category="bases">Bases</button>
+        <button onclick="window.lizGlamApp.setCategory('labiales')" class="filter-pill" data-category="labiales">Labiales</button>
+        <button onclick="window.lizGlamApp.setCategory('sombras')" class="filter-pill" data-category="sombras">Sombras</button>
+        <button onclick="window.lizGlamApp.setCategory('rubores')" class="filter-pill" data-category="rubores">Rubores</button>
+        <button onclick="window.lizGlamApp.setCategory('brochas')" class="filter-pill" data-category="brochas">Brochas</button>
+      </div>
+
       <div id="productGrid" class="product-grid">
         <!-- Loaded dynamically via JS -->
       </div>
     </section>
 
-    <!-- Services Section -->
-    <section style="margin-bottom: 5rem;" id="servicios">
+    <!-- SECTION 4: SERVICIOS & CITAS DE MAQUILLAJE -->
+    <section style="margin-bottom: 4.5rem;" id="servicios">
       <div class="section-title">
         <span>ESTUDIO PROFESIONAL</span>
-        <h2>Servicios & Maquillaje</h2>
+        <h2>Servicios & Citas de Maquillaje</h2>
       </div>
       <div id="servicesGrid" class="services-grid">
         <!-- Loaded dynamically via JS -->
       </div>
     </section>
 
-    <!-- Customer Reviews Section -->
-    <section style="margin-bottom: 5rem;">
+    <!-- SECTION 5: RESEÑAS & TESTIMONIOS -->
+    <section style="margin-bottom: 4.5rem;">
       <div class="section-title" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
         <div>
-          <span>OPINIONES DE CLIENTES</span>
+          <span>EXPERIENCIAS REALES</span>
           <h2 style="margin-bottom: 0;">Reseñas & Experiencias</h2>
         </div>
         <button onclick="document.getElementById('reviewModal').style.display = 'flex'" class="btn btn-sm btn-outline-rose">
@@ -125,11 +158,11 @@
       </div>
     </section>
 
-    <!-- Instagram Section Preview -->
-    <section style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 3rem 2rem; border: 1px solid var(--border-subtle); text-align: center;">
+    <!-- SECTION 6: INSTAGRAM COMMUNITY -->
+    <section style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 3.5rem 2rem; border: 1px solid var(--border-subtle); text-align: center; margin-bottom: 4rem;">
       <i class="bi bi-instagram" style="font-size: 3rem; color: #DC2743; margin-bottom: 1rem; display: block;"></i>
-      <h2 class="font-serif" style="font-size: 2rem; margin-bottom: 0.5rem;">Síguenos en Instagram</h2>
-      <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 1.5rem auto;">Encuentra tutoriales, transformaciones en vivo y atención personalizada vía DM en <strong>@lizglamstore</strong></p>
+      <h2 class="font-serif" style="font-size: 2rem; margin-bottom: 0.5rem;">Únete a nuestra comunidad en Instagram</h2>
+      <p style="color: var(--text-muted); max-width: 520px; margin: 0 auto 1.5rem auto; line-height: 1.6;">Descubre lanzamientos exclusivos, tutoriales de maquillaje y realiza tu pedido directo por DM en <strong>@lizglamstore</strong></p>
       <a href="https://instagram.com/lizglamstore" target="_blank" class="btn btn-instagram">
         <i class="bi bi-instagram"></i> Ir a @lizglamstore
       </a>

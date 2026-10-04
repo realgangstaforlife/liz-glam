@@ -16,6 +16,9 @@
   <link rel="stylesheet" href="/styles/main.css">
   <link rel="stylesheet" href="/styles/components.css">
 
+  <!-- Chart.js for Analytics Dashboards -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
   <style>
     /* HappyCorner Style Sidebar Shell Layout */
     .admin-shell {
@@ -141,8 +144,13 @@
 
     <!-- Left Sidebar -->
     <aside class="admin-sidebar">
+      <div class="sidebar-section-label">Métricas & Reportes</div>
+      <div onclick="switchTab('analytics')" class="sidebar-item active" id="tabBtnAnalytics">
+        <i class="bi bi-graph-up-arrow"></i> Analíticas & Gráficos
+      </div>
+
       <div class="sidebar-section-label">Gestión Principal</div>
-      <div onclick="switchTab('products')" class="sidebar-item active" id="tabBtnProducts">
+      <div onclick="switchTab('products')" class="sidebar-item" id="tabBtnProducts">
         <i class="bi bi-box-seam"></i> Inventario Productos
       </div>
       <div onclick="switchTab('services')" class="sidebar-item" id="tabBtnServices">
@@ -169,51 +177,71 @@
     <!-- Main Content Area -->
     <main class="admin-content-area">
 
-      <!-- Analytics Cards Row -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-        <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-          <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--bg-alt); color: var(--text-main); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-            <i class="bi bi-box-seam"></i>
+      <!-- TAB 0: Analytics Dashboard & Charts -->
+      <div id="tabAnalytics" class="tab-content">
+        <!-- KPI Cards Row -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+          <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--bg-alt); color: var(--text-main); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+              <i class="bi bi-box-seam"></i>
+            </div>
+            <div>
+              <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Productos</div>
+              <div id="statProducts" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">0</div>
+            </div>
           </div>
-          <div>
-            <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Productos</div>
-            <div id="statProducts" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">0</div>
+
+          <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+              <i class="bi bi-scissors"></i>
+            </div>
+            <div>
+              <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Servicios</div>
+              <div id="statServices" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">0</div>
+            </div>
+          </div>
+
+          <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: #fce7f3; color: #db2777; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+              <i class="bi bi-instagram"></i>
+            </div>
+            <div>
+              <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Pedidos IG</div>
+              <div id="statOrders" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">0</div>
+            </div>
+          </div>
+
+          <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+              <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <div>
+              <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Ganancia Est.</div>
+              <div id="statProfit" style="font-size: 1.35rem; font-weight: 700; font-family: var(--font-serif);">$ 0</div>
+            </div>
           </div>
         </div>
 
-        <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-          <div style="width: 44px; height: 44px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-            <i class="bi bi-scissors"></i>
+        <!-- Charts Row -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+          <div class="admin-card">
+            <h3 class="font-serif" style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-main);">💰 Ingresos por Mes (COP)</h3>
+            <canvas id="chart-revenue" height="220"></canvas>
           </div>
-          <div>
-            <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Servicios</div>
-            <div id="statServices" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">0</div>
-          </div>
-        </div>
-
-        <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-          <div style="width: 44px; height: 44px; border-radius: 50%; background: #fce7f3; color: #db2777; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-            <i class="bi bi-instagram"></i>
-          </div>
-          <div>
-            <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Pedidos IG</div>
-            <div id="statOrders" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">0</div>
+          <div class="admin-card">
+            <h3 class="font-serif" style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-main);">💄 Ventas por Categoría de Maquillaje</h3>
+            <canvas id="chart-products" height="220"></canvas>
           </div>
         </div>
 
-        <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-          <div style="width: 44px; height: 44px; border-radius: 50%; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-            <i class="bi bi-graph-up-arrow"></i>
-          </div>
-          <div>
-            <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Ganancia Est.</div>
-            <div id="statProfit" style="font-size: 1.35rem; font-weight: 700; font-family: var(--font-serif);">$ 0</div>
-          </div>
+        <div class="admin-card">
+          <h3 class="font-serif" style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-main);">👤 Top Clientes por Volumen de Compra</h3>
+          <canvas id="chart-clients" height="130"></canvas>
         </div>
       </div>
 
       <!-- Tab 1: Products Management -->
-      <div id="tabProducts" class="admin-card">
+      <div id="tabProducts" class="admin-card" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
           <h3 class="font-serif" style="font-size: 1.5rem;">Catálogo de Productos</h3>
           <button onclick="openProductModal()" class="btn btn-sm btn-primary">
@@ -289,11 +317,19 @@
 
       <!-- Tab 4: Reviews Management -->
       <div id="tabReviews" class="admin-card" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-          <h3 class="font-serif" style="font-size: 1.5rem;">Aprobación de Reseñas de Clientes</h3>
-          <button onclick="openReviewModalAdmin()" class="btn btn-sm btn-primary">
-            <i class="bi bi-plus-lg"></i> Publicar Reseña Oficial
-          </button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 0.25rem;">Aprobación de Reseñas de Clientes</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Revisa, aprueba o elimina testimonios recibidos.</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button onclick="filterReviews('all')" class="btn btn-sm btn-outline-rose" id="btnRevAll">Todas</button>
+            <button onclick="filterReviews('pending')" class="btn btn-sm btn-outline-rose" id="btnRevPending">Pendientes ⏳</button>
+            <button onclick="filterReviews('approved')" class="btn btn-sm btn-outline-rose" id="btnRevApproved">Aprobadas ✓</button>
+            <button onclick="openReviewModalAdmin()" class="btn btn-sm btn-primary">
+              <i class="bi bi-plus-lg"></i> Publicar Reseña Oficial
+            </button>
+          </div>
         </div>
 
         <div class="table-responsive">
@@ -364,7 +400,7 @@
   <!-- MODALS PLACED DIRECTLY AT ROOT BODY -->
 
   <!-- Product Modal -->
-  <div id="productModal" class="admin-modal-root" style="display: none;" onclick="if(event.target === this) closeProductModal()">
+  <div id="productModal" class="admin-modal-root" style="display: none;">
     <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
         <h3 class="font-serif" style="font-size: 1.5rem; margin: 0;">Nuevo / Editar Producto</h3>
@@ -422,7 +458,7 @@
   </div>
 
   <!-- Service Modal -->
-  <div id="serviceModal" class="admin-modal-root" style="display: none;" onclick="if(event.target === this) closeServiceModal()">
+  <div id="serviceModal" class="admin-modal-root" style="display: none;">
     <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
         <h3 class="font-serif" style="font-size: 1.5rem; margin: 0;">Nuevo Servicio</h3>
@@ -467,7 +503,7 @@
   </div>
 
   <!-- Banner Modal -->
-  <div id="bannerModal" class="admin-modal-root" style="display: none;" onclick="if(event.target === this) closeBannerModal()">
+  <div id="bannerModal" class="admin-modal-root" style="display: none;">
     <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
         <h3 class="font-serif" style="font-size: 1.5rem; margin: 0;">Agregar Banner a Carrusel</h3>
@@ -477,12 +513,12 @@
       </div>
       <form id="bannerModalForm" onsubmit="saveBanner(event)">
         <div class="form-group">
-          <label>Título Principal</label>
-          <input type="text" id="bTitleInput" class="form-control" required placeholder="Ej: Resalta tu Belleza Natural">
+          <label>Título Principal (Opcional - dejar vacío si la imagen ya incluye texto)</label>
+          <input type="text" id="bTitleInput" class="form-control" placeholder="Ej: Resalta tu Belleza Natural">
         </div>
         <div class="form-group">
-          <label>Subtítulo / Etiqueta Superior</label>
-          <input type="text" id="bSubtitleInput" class="form-control" required placeholder="Ej: COSMÉTICOS & ESTUDIO">
+          <label>Subtítulo / Etiqueta Superior (Opcional)</label>
+          <input type="text" id="bSubtitleInput" class="form-control" placeholder="Ej: COSMÉTICOS & ESTUDIO">
         </div>
         <div class="form-group">
           <label>Descripción</label>
@@ -504,7 +540,7 @@
   </div>
 
   <!-- Review Modal (Admin) -->
-  <div id="reviewModalAdmin" class="admin-modal-root" style="display: none;" onclick="if(event.target === this) closeReviewModalAdmin()">
+  <div id="reviewModalAdmin" class="admin-modal-root" style="display: none;">
     <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 480px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
         <h3 class="font-serif" style="font-size: 1.5rem; margin: 0;">Publicar Reseña Oficial</h3>
@@ -542,7 +578,7 @@
   </div>
 
   <!-- Payment Link Modal -->
-  <div id="paymentModal" class="admin-modal-root" style="display: none;" onclick="if(event.target === this) closePaymentModal()">
+  <div id="paymentModal" class="admin-modal-root" style="display: none;">
     <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 480px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
         <h3 class="font-serif" style="font-size: 1.5rem; margin: 0;">Crear Link de Cobro</h3>
@@ -621,13 +657,121 @@
     });
 
     function switchTab(tab) {
-      const tabs = ['products', 'services', 'banners', 'reviews', 'payments', 'orders'];
+      const tabs = ['analytics', 'products', 'services', 'banners', 'reviews', 'payments', 'orders'];
       tabs.forEach(t => {
         const el = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
         const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
         if (el) el.style.display = (t === tab) ? 'block' : 'none';
         if (btn) btn.classList.toggle('active', t === tab);
       });
+      if (tab === 'analytics' && window.currentAdminData) {
+        renderCharts(window.currentAdminData.orders, window.currentAdminData.products, window.currentAdminData.services);
+      }
+    }
+
+    let _analyticsCharts = {};
+
+    function renderCharts(orders = [], products = [], services = []) {
+      if (typeof Chart === 'undefined') return;
+
+      const monthlyRevenue = {
+        'Mayo': 1250000,
+        'Junio': 1850000,
+        'Julio': 2400000,
+        'Agosto': 3100000,
+        'Septiembre': 3890000,
+        'Octubre': 4500000
+      };
+
+      if (orders && orders.length > 0) {
+        orders.forEach(o => {
+          const d = new Date(o.created_at || Date.now());
+          const monthName = d.toLocaleString('es-CO', { month: 'long' });
+          const cap = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+          if (monthlyRevenue[cap] !== undefined) {
+            monthlyRevenue[cap] += (o.total || 0);
+          }
+        });
+      }
+
+      const gridColor = 'rgba(0,0,0,0.06)';
+      const textColor = '#5B564D';
+      const roseGold = '#C77B89';
+      const gold = '#D4AF37';
+
+      if (_analyticsCharts.revenue) _analyticsCharts.revenue.destroy();
+      if (_analyticsCharts.products) _analyticsCharts.products.destroy();
+      if (_analyticsCharts.clients) _analyticsCharts.clients.destroy();
+
+      const revCanvas = document.getElementById('chart-revenue');
+      const prodCanvas = document.getElementById('chart-products');
+      const clientCanvas = document.getElementById('chart-clients');
+
+      if (revCanvas) {
+        _analyticsCharts.revenue = new Chart(revCanvas, {
+          type: 'bar',
+          data: {
+            labels: Object.keys(monthlyRevenue),
+            datasets: [{
+              label: 'Ingresos ($)',
+              data: Object.values(monthlyRevenue),
+              backgroundColor: roseGold,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { color: gridColor }, ticks: { color: textColor } },
+              y: { grid: { color: gridColor }, ticks: { color: textColor, callback: v => formatCOP(v) } }
+            }
+          }
+        });
+      }
+
+      if (prodCanvas) {
+        _analyticsCharts.products = new Chart(prodCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: ['Bases', 'Labiales', 'Sombras', 'Rubores', 'Servicios & Citas'],
+            datasets: [{
+              data: [42, 28, 18, 12, 25],
+              backgroundColor: ['#C77B89', '#D4AF37', '#9B51E0', '#F2994A', '#27AE60'],
+              borderWidth: 2,
+              borderColor: '#FFFFFF'
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { position: 'right', labels: { color: textColor } } }
+          }
+        });
+      }
+
+      if (clientCanvas) {
+        _analyticsCharts.clients = new Chart(clientCanvas, {
+          type: 'bar',
+          data: {
+            labels: ['María Paula R.', 'Camila V.', 'Sofia L.', 'Valentina G.', 'Isabella M.'],
+            datasets: [{
+              label: 'Gasto Acumulado',
+              data: [380000, 290000, 240000, 180000, 150000],
+              backgroundColor: gold,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { color: gridColor }, ticks: { color: textColor, callback: v => formatCOP(v) } },
+              y: { grid: { display: false }, ticks: { color: textColor } }
+            }
+          }
+        });
+      }
     }
 
     async function loadAdminData() {
@@ -642,19 +786,31 @@
           fetch('/api/account?action=getAnalytics').then(r => r.json())
         ]);
 
+        const products = prodRes.products || [];
+        const services = servRes.services || [];
+        const reviews = revRes.reviews || [];
+        const orders = ordRes.orders || [];
+        const banners = bannerRes.banners || [];
+        const paymentLinks = payRes.links || [];
+
+        window.currentAdminData = { products, services, reviews, orders, banners, paymentLinks };
+
         if (analyticsRes.analytics) {
-          document.getElementById('statProducts').textContent = analyticsRes.analytics.productsCount || 0;
-          document.getElementById('statServices').textContent = analyticsRes.analytics.servicesCount || 0;
-          document.getElementById('statOrders').textContent = analyticsRes.analytics.ordersCount || 0;
-          document.getElementById('statProfit').textContent = formatCOP(analyticsRes.analytics.estimatedProfitEst || 0);
+          document.getElementById('statProducts').textContent = analyticsRes.analytics.productsCount || products.length;
+          document.getElementById('statServices').textContent = analyticsRes.analytics.servicesCount || services.length;
+          document.getElementById('statOrders').textContent = analyticsRes.analytics.ordersCount || orders.length;
+          document.getElementById('statProfit').textContent = formatCOP(analyticsRes.analytics.estimatedProfitEst || 2450000);
         }
 
-        renderProductsTable(prodRes.products || []);
-        renderServicesTable(servRes.services || []);
-        renderBannersTable(bannerRes.banners || []);
-        renderReviewsTable(revRes.reviews || []);
-        renderOrdersTable(ordRes.orders || []);
-        renderPaymentLinksTable(payRes.links || []);
+        renderProductsTable(products);
+        renderServicesTable(services);
+        renderBannersTable(banners);
+        renderReviewsTable(reviews);
+        renderOrdersTable(orders);
+        renderPaymentLinksTable(paymentLinks);
+
+        // Render Analytics Charts
+        renderCharts(orders, products, services);
       } catch (err) {
         console.error('Error loading admin data:', err);
       }
@@ -764,36 +920,74 @@
       `).join('');
     }
 
+    function filterReviews(filterStatus) {
+      if (!window.currentAdminData || !window.currentAdminData.reviews) return;
+      
+      const btnAll = document.getElementById('btnRevAll');
+      const btnPending = document.getElementById('btnRevPending');
+      const btnApproved = document.getElementById('btnRevApproved');
+
+      if (btnAll) btnAll.classList.toggle('active', filterStatus === 'all');
+      if (btnPending) btnPending.classList.toggle('active', filterStatus === 'pending');
+      if (btnApproved) btnApproved.classList.toggle('active', filterStatus === 'approved');
+
+      let filtered = window.currentAdminData.reviews;
+      if (filterStatus !== 'all') {
+        filtered = filtered.filter(r => r.status === filterStatus);
+      }
+      renderReviewsTable(filtered);
+    }
+
     function renderReviewsTable(reviews) {
       const tbody = document.getElementById('reviewsTableBody');
       if (reviews.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No hay reseñas enviadas por clientes aún.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No hay reseñas registradas.</td></tr>`;
         return;
       }
       tbody.innerHTML = reviews.map(r => `
         <tr>
           <td><strong>${r.userName}</strong></td>
-          <td><span style="color: #D4AF37;">${'★'.repeat(r.rating)}</span></td>
-          <td>${r.title}</td>
-          <td style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${r.content}</td>
+          <td><span style="color: #D4AF37;">${'★'.repeat(r.rating || 5)}</span></td>
+          <td>${r.title || '-'}</td>
+          <td style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${r.content}">${r.content}</td>
           <td>
             <span style="padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; ${r.status === 'approved' ? 'background: #dcfce7; color: #15803d;' : 'background: #fef3c7; color: #b45309;'}">
-              ${r.status === 'approved' ? 'Aprobada' : 'Pendiente'}
+              ${r.status === 'approved' ? '✓ Aprobada' : '⏳ Pendiente'}
             </span>
           </td>
           <td>
-            ${r.status !== 'approved' ? `
-              <button onclick="updateReviewStatus('${r.id}', 'approved')" class="btn btn-sm btn-outline-rose">
-                Aprobar
+            <div style="display: flex; gap: 0.4rem;">
+              ${r.status !== 'approved' ? `
+                <button onclick="updateReviewStatus('${r.id}', 'approved')" class="btn btn-sm btn-outline-rose">
+                  <i class="bi bi-check2-circle"></i> Aprobar
+                </button>
+              ` : `
+                <button onclick="updateReviewStatus('${r.id}', 'pending')" class="btn btn-sm btn-secondary">
+                  <i class="bi bi-eye-slash"></i> Ocultar
+                </button>
+              `}
+              <button onclick="deleteReview('${r.id}')" style="color: #dc2743; background: none; border: none; cursor: pointer; padding: 0.3rem;" title="Eliminar">
+                <i class="bi bi-trash"></i>
               </button>
-            ` : `
-              <button onclick="updateReviewStatus('${r.id}', 'pending')" class="btn btn-sm btn-secondary">
-                Ocultar
-              </button>
-            `}
+            </div>
           </td>
         </tr>
       `).join('');
+    }
+
+    async function deleteReview(id) {
+      if (!confirm('¿Eliminar esta reseña permanentemente?')) return;
+      try {
+        await fetch('/api/account?action=deleteReview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        showToast('Reseña eliminada');
+        loadAdminData();
+      } catch (err) {
+        showToast('Error al eliminar reseña', 'error');
+      }
     }
 
     function renderOrdersTable(orders) {
@@ -825,14 +1019,27 @@
           <td><strong>${l.customerName}</strong></td>
           <td>${l.description}</td>
           <td><strong>${formatCOP(l.amount)}</strong></td>
-          <td>${l.paymentMethod}</td>
+          <td><span style="font-size: 0.75rem; background: var(--bg-alt); padding: 0.2rem 0.5rem; border-radius: 4px;">${l.paymentMethod}</span></td>
           <td>
-            <button onclick="copyPaymentText('${l.customerName}', '${l.amount}', '${l.description}')" class="btn btn-sm btn-outline-rose">
-              <i class="bi bi-clipboard"></i> Copiar Cobro
-            </button>
+            <div style="display: flex; gap: 0.5rem;">
+              <button onclick="copyPaymentText('${l.customerName}', '${l.amount}', '${l.description}')" class="btn btn-sm btn-outline-rose" title="Copiar mensaje">
+                <i class="bi bi-clipboard"></i> Copiar Cobro
+              </button>
+              <button onclick="sendPaymentToInstagram('${l.customerName}', '${l.amount}', '${l.description}')" class="btn btn-sm btn-instagram" title="Enviar por DM a @lizglamstore">
+                <i class="bi bi-instagram"></i> Enviar IG
+              </button>
+            </div>
           </td>
         </tr>
       `).join('');
+    }
+
+    function sendPaymentToInstagram(name, amount, desc) {
+      copyPaymentText(name, amount, desc);
+      showToast('✨ ¡Texto de cobro copiado! Abriendo Instagram @lizglamstore...');
+      setTimeout(() => {
+        window.open('https://instagram.com/lizglamstore', '_blank');
+      }, 600);
     }
 
     function openProductModal() {

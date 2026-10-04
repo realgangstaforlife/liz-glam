@@ -1,9 +1,9 @@
 /* ==========================================================================
-   LIZGLAM BEAUTY PLATFORM - ATENEA PROFESIONAL EXACT SPECIFICATIONS
-   Extracted from Atenea Theme (Arimo Typography & Color Scheme 1 / 14e)
+   LIZGLAM BEAUTY PLATFORM - ELEGANT TYPOGRAPHY & BRANDING
+   Playfair Display for Uppercase Headings & Montserrat for Body Text
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap');
 
 :root {
   /* Atenea Exact Theme Colors (Scheme 1 & Scheme 14e) */
@@ -33,9 +33,9 @@
   --shadow-lg: 0 16px 40px rgba(91, 86, 77, 0.12);
   --shadow-rose: 0 10px 25px rgba(199, 123, 137, 0.2);
 
-  /* Typography (Atenea uses Arimo font family across headings, subheadings and body) */
-  --font-serif: 'Arimo', sans-serif;
-  --font-sans: 'Arimo', sans-serif;
+  /* Typography (Playfair Display for headings & Montserrat for body) */
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Montserrat', sans-serif;
   
   /* Radii & Transitions */
   --radius-sm: 0px;
@@ -61,8 +61,8 @@ body {
   font-family: var(--font-sans);
   background-color: var(--bg-main);
   color: var(--text-main);
-  line-height: 1.4;
-  letter-spacing: 0.04em;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -87,12 +87,12 @@ img {
 }
 
 /* Typography Helpers */
-h1, h2, h3, h4, .font-serif {
+h1, h2, h3, h4, .font-serif, .brand-logo {
   font-family: var(--font-serif);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 1.1;
+  font-weight: 600;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
   color: var(--text-main);
 }
 

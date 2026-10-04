@@ -13,6 +13,9 @@ try {
     if (!getApps().length) {
       const rawAccount = (process.env.FIREBASE_SERVICE_ACCOUNT || '').trim();
       const serviceAccount = JSON.parse(rawAccount);
+      if (serviceAccount.private_key && typeof serviceAccount.private_key === 'string') {
+        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+      }
       initializeApp({
         credential: cert(serviceAccount)
       });
@@ -338,7 +341,7 @@ module.exports = async function handler(req, res) {
       }
 
       case 'saveReview': {
-        const { userName, rating, title, content } = req.body || {};
+        const { userName, rating, title, content, status } = req.body || {};
         if (!content || content.length < 5) {
           return res.status(400).json({ success: false, error: 'La reseña debe contener al menos 5 caracteres.' });
         }
@@ -347,7 +350,7 @@ module.exports = async function handler(req, res) {
           rating: Number(rating) || 5,
           title: title || 'Reseña de Cliente',
           content: content,
-          status: 'pending',
+          status: status || 'pending',
           createdAt: new Date().toISOString()
         };
 
@@ -367,6 +370,14 @@ module.exports = async function handler(req, res) {
           await db.collection('reviews').doc(String(id)).set({ status: status || 'approved' }, { merge: true });
         }
         return res.status(200).json({ success: true, message: 'Estado de reseña actualizado' });
+      }
+
+      case 'deleteReview': {
+        const { id } = req.body || {};
+        if (db && id) {
+          await db.collection('reviews').doc(String(id)).delete();
+        }
+        return res.status(200).json({ success: true, message: 'Reseña eliminada' });
       }
 
       // 5. CLOUDFLARE R2 IMAGE UPLOAD
