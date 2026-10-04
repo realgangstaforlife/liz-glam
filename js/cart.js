@@ -41,8 +41,14 @@ class CartManager {
     }
 
     this.saveCart();
-    showToast(`"${item.name}" agregado al carrito`);
-    this.openDrawer();
+    showToast(`✨ "${item.name}" se agregó a tu carrito`);
+    
+    // Animate cart badge pop
+    const badges = document.querySelectorAll('.cart-badge');
+    badges.forEach(b => {
+      b.style.transform = 'scale(1.4)';
+      setTimeout(() => b.style.transform = 'scale(1)', 250);
+    });
   }
 
   removeItem(id) {

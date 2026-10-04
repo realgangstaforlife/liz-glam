@@ -8,26 +8,26 @@
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  padding: 0.85rem 1.75rem;
+  padding: 0.85rem 1.85rem;
   border-radius: var(--radius-pill);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   transition: var(--transition-smooth);
   cursor: pointer;
 }
 
 .btn-primary {
-  background: var(--rose-gold-dark);
+  background: var(--text-main);
   color: #FFF;
-  box-shadow: var(--shadow-rose);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover {
-  background: var(--text-main);
+  background: var(--rose-gold-dark);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-rose);
 }
 
 .btn-secondary {
@@ -55,12 +55,12 @@
 .btn-instagram {
   background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
   color: #FFF;
-  box-shadow: 0 4px 15px rgba(220, 39, 67, 0.3);
+  box-shadow: 0 4px 15px rgba(220, 39, 67, 0.25);
 }
 
 .btn-instagram:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(220, 39, 67, 0.4);
+  box-shadow: 0 8px 25px rgba(220, 39, 67, 0.35);
 }
 
 .btn-copy {
@@ -69,58 +69,60 @@
 }
 
 .btn-copy:hover {
-  background: #382B2E;
+  background: #352B2E;
   transform: translateY(-2px);
 }
 
 .btn-sm {
-  padding: 0.5rem 1rem;
-  font-size: 0.75rem;
+  padding: 0.55rem 1.15rem;
+  font-size: 0.725rem;
 }
 
 .btn-full {
   width: 100%;
 }
 
-/* Category Filter Pills */
+/* Category Filter Pills - Atenea Style */
 .category-filter {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  margin-bottom: 3rem;
+  margin-bottom: 3.5rem;
 }
 
 .filter-pill {
-  padding: 0.6rem 1.35rem;
+  padding: 0.65rem 1.5rem;
   border-radius: var(--radius-pill);
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--text-muted);
   transition: var(--transition-smooth);
 }
 
 .filter-pill:hover,
 .filter-pill.active {
-  background: var(--rose-gold-light);
-  color: var(--rose-gold-dark);
-  border-color: var(--rose-gold);
+  background: var(--text-main);
+  color: #FFF;
+  border-color: var(--text-main);
 }
 
 /* Grids */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 2.25rem;
 }
 
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2.25rem;
 }
 
 /* Product Card - Atenea Aesthetic */
@@ -136,9 +138,9 @@
 }
 
 .product-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-5px);
   box-shadow: var(--shadow-md);
-  border-color: var(--rose-gold);
+  border-color: var(--border-strong);
 }
 
 .product-img-wrapper {
@@ -153,63 +155,67 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s ease;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .product-card:hover .product-img {
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
 
 .product-badge {
   position: absolute;
   top: 1rem;
   left: 1rem;
-  background: var(--bg-dark);
+  background: rgba(28, 23, 24, 0.85);
+  backdrop-filter: blur(4px);
   color: var(--rose-gold-light);
-  font-size: 0.65rem;
+  font-size: 0.625rem;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.18em;
   padding: 0.3rem 0.65rem;
   border-radius: var(--radius-sm);
   font-weight: 600;
 }
 
 .product-content {
-  padding: 1.25rem;
+  padding: 1.35rem;
   display: flex;
   flex-direction: column;
   flex: 1;
 }
 
 .product-category {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.18em;
   color: var(--rose-gold-dark);
   font-weight: 600;
   margin-bottom: 0.35rem;
 }
 
 .product-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
   color: var(--text-main);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  line-height: 1.25;
 }
 
 .product-desc {
-  font-size: 0.85rem;
+  font-size: 0.825rem;
   color: var(--text-muted);
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   flex: 1;
+  line-height: 1.5;
 }
 
 .product-price-row {
@@ -217,14 +223,14 @@
   align-items: center;
   justify-content: space-between;
   margin-top: auto;
-  padding-top: 0.75rem;
-  border-top: 1px dashed var(--border-subtle);
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .product-price {
   font-family: var(--font-serif);
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: 600;
   color: var(--text-main);
 }
 
@@ -245,7 +251,7 @@
 
 .service-img {
   width: 100%;
-  height: 200px;
+  height: 210px;
   object-fit: cover;
 }
 
@@ -261,36 +267,43 @@
 }
 
 .service-title {
-  font-size: 1.35rem;
+  font-size: 1.4rem;
+  font-weight: 500;
 }
 
 .service-price {
   font-family: var(--font-serif);
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: 600;
   color: var(--rose-gold-dark);
 }
 
 .service-duration {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   margin-bottom: 1rem;
   background: var(--bg-alt);
-  padding: 0.25rem 0.65rem;
+  padding: 0.3rem 0.75rem;
   border-radius: var(--radius-pill);
 }
 
 /* Combo Card */
 .combo-card {
-  background: linear-gradient(135deg, #FFF 0%, var(--bg-alt) 100%);
-  border: 1.5px solid var(--rose-gold);
+  background: #FFF;
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  padding: 1.75rem;
+  padding: 1.85rem;
   position: relative;
-  box-shadow: var(--shadow-rose);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-smooth);
+}
+
+.combo-card:hover {
+  border-color: var(--rose-gold);
+  box-shadow: var(--shadow-md);
 }
 
 .combo-badge {
@@ -299,9 +312,10 @@
   right: 20px;
   background: var(--rose-gold-dark);
   color: #FFF;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.1em;
   padding: 0.35rem 0.85rem;
   border-radius: var(--radius-pill);
 }
@@ -310,7 +324,7 @@
 .cart-drawer-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(26, 21, 23, 0.6);
+  background: rgba(28, 23, 24, 0.55);
   backdrop-filter: blur(4px);
   z-index: 2000;
   opacity: 0;
@@ -370,8 +384,8 @@
 }
 
 .cart-item-img {
-  width: 70px;
-  height: 70px;
+  width: 72px;
+  height: 72px;
   border-radius: var(--radius-md);
   object-fit: cover;
   background: var(--bg-alt);
@@ -454,9 +468,9 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   border: 1px solid var(--rose-gold);
-  animation: slideUp 0.3s ease forwards;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideUp {
@@ -468,7 +482,7 @@
 .admin-card {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
-  padding: 1.75rem;
+  padding: 2rem;
   border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-sm);
   margin-bottom: 2rem;
@@ -480,15 +494,17 @@
 
 .form-group label {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.825rem;
   font-weight: 600;
   margin-bottom: 0.35rem;
   color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .form-control {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.8rem 1rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-strong);
   background: var(--bg-main);
@@ -499,8 +515,8 @@
 
 .form-control:focus {
   outline: none;
-  border-color: var(--rose-gold-dark);
-  box-shadow: 0 0 0 3px rgba(212, 155, 133, 0.2);
+  border-color: var(--text-main);
+  box-shadow: 0 0 0 3px rgba(31, 26, 27, 0.08);
 }
 
 .table-responsive {
@@ -515,16 +531,16 @@
 }
 
 .custom-table th, .custom-table td {
-  padding: 0.85rem 1rem;
+  padding: 0.95rem 1.1rem;
   border-bottom: 1px solid var(--border-subtle);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .custom-table th {
   background: var(--bg-alt);
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
+  font-size: 0.725rem;
+  letter-spacing: 0.1em;
   color: var(--text-muted);
 }
