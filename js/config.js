@@ -4,12 +4,13 @@
 
 // Firebase Configuration for LizGlam (Separate Instance from HappyCorner)
 const firebaseConfig = {
-  apiKey: "AIzaSyLizGlamDefaultApiKeyForTesting12345",
-  authDomain: "lizglam-beauty.firebaseapp.com",
-  projectId: "lizglam-beauty",
-  storageBucket: "lizglam-beauty.appspot.com",
-  messagingSenderId: "987654321012",
-  appId: "1:987654321012:web:abcdef123456789"
+  apiKey: "AIzaSyCm6ynzGPfVJJDw4izYi308mA0MiNnsV4E",
+  authDomain: "lizglam-store.firebaseapp.com",
+  projectId: "lizglam-store",
+  storageBucket: "lizglam-store.firebasestorage.app",
+  messagingSenderId: "767126841599",
+  appId: "1:767126841599:web:ae6bf5719931e6e03d84ca",
+  measurementId: "G-49MMQGG4W7"
 };
 
 // API Endpoint Helper

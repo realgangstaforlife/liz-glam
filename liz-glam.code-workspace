@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../happy-corner"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "liz-glam"
+	}
+}

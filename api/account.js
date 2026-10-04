@@ -11,7 +11,8 @@ try {
   
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     if (!getApps().length) {
-      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      const rawAccount = (process.env.FIREBASE_SERVICE_ACCOUNT || '').trim();
+      const serviceAccount = JSON.parse(rawAccount);
       initializeApp({
         credential: cert(serviceAccount)
       });
