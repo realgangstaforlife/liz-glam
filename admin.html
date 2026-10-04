@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración | LizGlam Beauty</title>
-  <meta name="description" content="Panel de administración de LizGlam Beauty Store. Gestión de productos, servicios y pedidos de Instagram.">
+  <meta name="description" content="Panel de administración de LizGlam Beauty Store. Gestión de productos, servicios, usuarios y pedidos de Instagram.">
 
   <!-- Icons & Fonts -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -21,7 +21,8 @@
       <a href="/" class="brand-logo" style="color: #FFF;">
         LIZGLAM<span class="dot" style="color: var(--rose-gold);">.</span> <span style="font-size: 0.8rem; font-weight: 400; text-transform: uppercase; opacity: 0.7; font-family: var(--font-sans);">[Admin Panel]</span>
       </a>
-      <div>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div id="adminUserStatus" style="font-size: 0.85rem;"></div>
         <a href="/" class="btn btn-sm btn-outline-rose" style="color: #FFF; border-color: var(--rose-gold);">
           <i class="bi bi-house"></i> Volver a la Tienda
         </a>
@@ -34,7 +35,7 @@
     <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
       <div>
         <h1 class="font-serif" style="font-size: 2.25rem;">Panel de Control</h1>
-        <p style="color: var(--text-muted);">Gestiona tu inventario, servicios y pedidos de Instagram.</p>
+        <p style="color: var(--text-muted);">Gestiona tu inventario, citas, usuarios y pedidos de Instagram.</p>
       </div>
       <div>
         <button onclick="loadAdminData()" class="btn btn-sm btn-primary">
@@ -48,14 +49,14 @@
   <main class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
 
     <!-- Analytics Cards Row -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
       
       <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
         <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--rose-gold-light); color: var(--rose-gold-dark); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
           <i class="bi bi-box-seam"></i>
         </div>
         <div>
-          <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Productos</div>
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Productos</div>
           <div id="statProducts" style="font-size: 1.75rem; font-weight: 700; font-family: var(--font-serif);">0</div>
         </div>
       </div>
@@ -65,18 +66,18 @@
           <i class="bi bi-scissors"></i>
         </div>
         <div>
-          <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Servicios</div>
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Servicios</div>
           <div id="statServices" style="font-size: 1.75rem; font-weight: 700; font-family: var(--font-serif);">0</div>
         </div>
       </div>
 
       <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
         <div style="width: 50px; height: 50px; border-radius: 50%; background: #fce7f3; color: #db2777; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-          <i class="bi bi-instagram"></i>
+          <i class="bi bi-people"></i>
         </div>
         <div>
-          <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Pedidos IG</div>
-          <div id="statOrders" style="font-size: 1.75rem; font-weight: 700; font-family: var(--font-serif);">0</div>
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Usuarios</div>
+          <div id="statUsers" style="font-size: 1.75rem; font-weight: 700; font-family: var(--font-serif);">0</div>
         </div>
       </div>
 
@@ -85,7 +86,7 @@
           <i class="bi bi-currency-dollar"></i>
         </div>
         <div>
-          <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Ventas Est.</div>
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Ventas Est.</div>
           <div id="statRevenue" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">$ 0</div>
         </div>
       </div>
@@ -93,9 +94,10 @@
     </div>
 
     <!-- Admin Section Tabs -->
-    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-subtle); padding-bottom: 0.5rem;">
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-subtle); padding-bottom: 0.5rem; flex-wrap: wrap;">
       <button onclick="switchTab('products')" class="btn btn-sm filter-pill active" id="tabBtnProducts">Inventario de Productos</button>
       <button onclick="switchTab('services')" class="btn btn-sm filter-pill" id="tabBtnServices">Servicios & Citas</button>
+      <button onclick="switchTab('users')" class="btn btn-sm filter-pill" id="tabBtnUsers">Usuarios Registrados & Roles</button>
       <button onclick="switchTab('orders')" class="btn btn-sm filter-pill" id="tabBtnOrders">Historial de Pedidos IG</button>
     </div>
 
@@ -150,7 +152,32 @@
       </div>
     </div>
 
-    <!-- Tab 3: Orders History -->
+    <!-- Tab 3: Users & Roles Management -->
+    <div id="tabUsers" class="admin-card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3 class="font-serif" style="font-size: 1.5rem;">Usuarios Registrados en Firestore</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Haz clic en el rol para cambiar a <strong>admin</strong> o <strong>user</strong>.</p>
+      </div>
+
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>UID</th>
+              <th>Rol Actual</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <!-- Loaded dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 4: Orders History -->
     <div id="tabOrders" class="admin-card" style="display: none;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h3 class="font-serif" style="font-size: 1.5rem;">Pedidos Redirigidos a Instagram</h3>
@@ -177,7 +204,7 @@
   </main>
 
   <!-- Add Product Modal -->
-  <div id="productModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; align-items: center; justify-content: center;">
+  <div id="productModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); z-index: 4000; align-items: center; justify-content: center;">
     <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
       <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Nuevo Producto</h3>
       <form id="productForm" onsubmit="saveProduct(event)">
@@ -187,7 +214,6 @@
         </div>
         <div class="form-group">
           <label>Categoría</label>
-
           <select id="pCategory" class="form-control" required>
             <option value="bases">Bases</option>
             <option value="labiales">Labiales</option>
@@ -229,37 +255,60 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      window.authManager.onAuthStateChanged(user => {
+        const statusEl = document.getElementById('adminUserStatus');
+        if (user) {
+          statusEl.innerHTML = `
+            <span style="background: var(--rose-gold-dark); color: #FFF; padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.75rem;">
+              <i class="bi bi-person-check"></i> ${user.displayName} (${user.role})
+            </span>
+          `;
+        } else {
+          statusEl.innerHTML = `
+            <button onclick="window.authManager.signInWithGoogle()" class="btn btn-sm btn-outline-rose" style="color: #FFF; border-color: #FFF;">
+              <i class="bi bi-google"></i> Iniciar Sesión Admin
+            </button>
+          `;
+        }
+      });
+
       loadAdminData();
     });
 
     function switchTab(tab) {
       document.getElementById('tabProducts').style.display = tab === 'products' ? 'block' : 'none';
       document.getElementById('tabServices').style.display = tab === 'services' ? 'block' : 'none';
+      document.getElementById('tabUsers').style.display = tab === 'users' ? 'block' : 'none';
       document.getElementById('tabOrders').style.display = tab === 'orders' ? 'block' : 'none';
 
       document.getElementById('tabBtnProducts').classList.toggle('active', tab === 'products');
       document.getElementById('tabBtnServices').classList.toggle('active', tab === 'services');
+      document.getElementById('tabBtnUsers').classList.toggle('active', tab === 'users');
       document.getElementById('tabBtnOrders').classList.toggle('active', tab === 'orders');
     }
 
     async function loadAdminData() {
       try {
-        const [prodRes, servRes, ordRes, analyticsRes] = await Promise.all([
+        const [prodRes, servRes, usersRes, ordRes, analyticsRes] = await Promise.all([
           fetch('/api/account?action=getProducts').then(r => r.json()),
           fetch('/api/account?action=getServices').then(r => r.json()),
+          fetch('/api/account?action=getUsers').then(r => r.json()),
           fetch('/api/account?action=getOrders').then(r => r.json()),
           fetch('/api/account?action=getAnalytics').then(r => r.json())
         ]);
 
+        const usersList = usersRes.users || [];
+
         if (analyticsRes.analytics) {
           document.getElementById('statProducts').textContent = analyticsRes.analytics.productsCount || 0;
           document.getElementById('statServices').textContent = analyticsRes.analytics.servicesCount || 0;
-          document.getElementById('statOrders').textContent = analyticsRes.analytics.ordersCount || 0;
+          document.getElementById('statUsers').textContent = usersList.length || 0;
           document.getElementById('statRevenue').textContent = formatCOP(analyticsRes.analytics.totalRevenueEst || 0);
         }
 
         renderProductsTable(prodRes.products || []);
         renderServicesTable(servRes.services || []);
+        renderUsersTable(usersList);
         renderOrdersTable(ordRes.orders || []);
       } catch (err) {
         console.error('Error loading admin data:', err);
@@ -296,6 +345,36 @@
       `).join('');
     }
 
+    function renderUsersTable(users) {
+      const tbody = document.getElementById('usersTableBody');
+      if (users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Los usuarios iniciados sesión se registrarán aquí en Firestore.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = users.map(u => `
+        <tr>
+          <td>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <img src="${u.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}" style="width: 30px; height: 30px; border-radius: 50%;">
+              <strong>${u.displayName || 'Usuario'}</strong>
+            </div>
+          </td>
+          <td>${u.email || '-'}</td>
+          <td><code style="font-size: 0.75rem;">${u.uid || u.id}</code></td>
+          <td>
+            <span style="padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; ${u.role === 'admin' ? 'background: #dcfce7; color: #15803d;' : 'background: #f1f5f9; color: #475569;'}">
+              ${u.role || 'user'}
+            </span>
+          </td>
+          <td>
+            <button onclick="toggleUserRole('${u.uid || u.id}', '${u.role === 'admin' ? 'user' : 'admin'}')" class="btn btn-sm btn-outline-rose">
+              Cambiar a ${u.role === 'admin' ? 'Usuario' : 'Admin'}
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
     function renderOrdersTable(orders) {
       const tbody = document.getElementById('ordersTableBody');
       if (orders.length === 0) {
@@ -311,6 +390,23 @@
           <td><strong>${formatCOP(o.total || 0)}</strong></td>
         </tr>
       `).join('');
+    }
+
+    async function toggleUserRole(uid, newRole) {
+      try {
+        const res = await fetch('/api/account?action=setUserRole', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uid, role: newRole })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Rol actualizado a ${newRole}`);
+          loadAdminData();
+        }
+      } catch (e) {
+        showToast('Error al cambiar rol', 'error');
+      }
     }
 
     function openProductModal() {

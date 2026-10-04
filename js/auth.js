@@ -1,5 +1,5 @@
 /**
- * LizGlam Beauty Platform - Authentication Module (Google Sign-In + Firebase Auth)
+ * LizGlam Beauty Platform - Authentication Module (Google Sign-In + Firestore User Sync)
  */
 
 class AuthManager {
@@ -17,7 +17,7 @@ class AuthManager {
       }
       
       if (firebase.auth) {
-        firebase.auth().onAuthStateChanged(user => {
+        firebase.auth().onAuthStateChanged(async (user) => {
           if (user) {
             this.currentUser = {
               uid: user.uid,
@@ -27,6 +27,7 @@ class AuthManager {
               role: (user.email === 'admin@lizglam.happycorner.top' || user.email.includes('admin')) ? 'admin' : 'user'
             };
             localStorage.setItem('lizglam_user', JSON.stringify(this.currentUser));
+            await this.syncUserToFirestore(this.currentUser);
           } else {
             const saved = localStorage.getItem('lizglam_user');
             this.currentUser = saved ? JSON.parse(saved) : null;
@@ -69,17 +70,19 @@ class AuthManager {
           role: (user.email === 'admin@lizglam.happycorner.top' || user.email.includes('admin')) ? 'admin' : 'user'
         };
         localStorage.setItem('lizglam_user', JSON.stringify(this.currentUser));
+        await this.syncUserToFirestore(this.currentUser);
       } else {
-        // Demo fallback
-        const mockGoogleUser = {
+        // Fallback user sync
+        const mockUser = {
           uid: "user_" + Math.random().toString(36).substring(2, 9),
           displayName: "Cliente LizGlam",
           email: "cliente@gmail.com",
           photoURL: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
           role: "admin"
         };
-        this.currentUser = mockGoogleUser;
-        localStorage.setItem('lizglam_user', JSON.stringify(mockGoogleUser));
+        this.currentUser = mockUser;
+        localStorage.setItem('lizglam_user', JSON.stringify(mockUser));
+        await this.syncUserToFirestore(mockUser);
       }
 
       if (window.cartManager) {
@@ -93,6 +96,45 @@ class AuthManager {
     } catch (error) {
       console.error('Google Sign-In Error:', error);
       showToast('Error al iniciar sesión con Google: ' + (error.message || 'Intente nuevamente'), 'error');
+    }
+  }
+
+  async syncUserToFirestore(userData) {
+    try {
+      // 1. Client SDK direct sync to users collection if initialized
+      if (typeof firebase !== 'undefined' && firebase.firestore) {
+        const db = firebase.firestore();
+        const userRef = db.collection('users').doc(userData.uid);
+        const doc = await userRef.get();
+        if (!doc.exists) {
+          await userRef.set({
+            ...userData,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        } else {
+          // Read existing role from database if assigned!
+          const existing = doc.data();
+          if (existing.role) {
+            userData.role = existing.role;
+            localStorage.setItem('lizglam_user', JSON.stringify(userData));
+          }
+          await userRef.update({
+            displayName: userData.displayName,
+            photoURL: userData.photoURL,
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+      }
+
+      // 2. Server API sync as fallback
+      fetch(`${API_URL}?action=syncUser`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      }).catch(err => console.warn('API syncUser notice:', err));
+    } catch (e) {
+      console.warn('Sync user error:', e);
     }
   }
 

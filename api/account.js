@@ -3,12 +3,12 @@
  * LizGlam Beauty Platform - api/account.js
  */
 
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
+
 // Initialize Firebase Admin dynamically if module and environment key are available
 let db = null;
 try {
-  const { initializeApp, cert, getApps } = require('firebase-admin/app');
-  const { getFirestore } = require('firebase-admin/firestore');
-  
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     if (!getApps().length) {
       const rawAccount = (process.env.FIREBASE_SERVICE_ACCOUNT || '').trim();
@@ -23,18 +23,42 @@ try {
   console.warn('Firebase Admin module notice (running in client/standalone mode):', e.message);
 }
 
-// In-Memory Seed Fallback Data (when DB is empty or during local dev before credentials)
+// Optional Cloudflare R2 S3 Client Initialization
+let s3Client = null;
+let r2Bucket = process.env.R2_BUCKET_NAME || 'lizglam';
+let r2PublicDomain = process.env.R2_PUBLIC_DOMAIN || '';
+
+try {
+  if (process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_ACCOUNT_ID) {
+    const { S3Client } = require('@aws-sdk/client-s3');
+    s3Client = new S3Client({
+      region: 'auto',
+      endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
+      }
+    });
+  }
+} catch (e) {
+  console.warn('R2 Client notice (R2 credentials unconfigured or module missing):', e.message);
+}
+
+// In-Memory Seed Fallback Data
 const SEED_PRODUCTS = [
   {
     id: "prod_1",
     name: "Base Aurélia Sélection Nude",
     category: "bases",
     price: 68000,
-    description: "Base de maquillaje con acabado luminoso y cobertura construible. Fórmula hidratante de larga duración.",
+    description: "Base de maquillaje con acabado luminoso y cobertura construible.",
     image_url: "/assets/foundation.jpg",
+    shades: [
+      { name: "Nude Porcelana", hex: "#F5E0D3" },
+      { name: "Beige Natural", hex: "#E8CBB9" },
+      { name: "Miel Cálido", hex: "#D6A78B" }
+    ],
     stock: 15,
-    rating: 4.9,
-    reviewsCount: 28,
     active: true
   },
   {
@@ -42,11 +66,14 @@ const SEED_PRODUCTS = [
     name: "Labial Velvet Rose Mat",
     category: "labiales",
     price: 38000,
-    description: "Labial mate cremoso en tono rosa suave. Alta pigmentación sin resecar los labios.",
+    description: "Labial mate cremoso en tono rosa suave. Alta pigmentación sin resecar.",
     image_url: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=600&q=80",
+    shades: [
+      { name: "Velvet Rose", hex: "#C77B89" },
+      { name: "Ruby Glam", hex: "#8A3535" },
+      { name: "Nude Coral", hex: "#D48B8B" }
+    ],
     stock: 22,
-    rating: 4.8,
-    reviewsCount: 42,
     active: true
   },
   {
@@ -56,33 +83,8 @@ const SEED_PRODUCTS = [
     price: 95000,
     description: "Paleta con 10 tonos sedosos entre mates elegantes y destellos deslumbrantes.",
     image_url: "/assets/hero-banner.jpg",
+    shades: [],
     stock: 10,
-    rating: 5.0,
-    reviewsCount: 35,
-    active: true
-  },
-  {
-    id: "prod_4",
-    name: "Rubor Sedoso Glow & Pink",
-    category: "rubores",
-    price: 42000,
-    description: "Rubor compacto ultra fino con destellos dorados sutiles para mejillas radiantes.",
-    image_url: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=600&q=80",
-    stock: 18,
-    rating: 4.7,
-    reviewsCount: 19,
-    active: true
-  },
-  {
-    id: "prod_5",
-    name: "Set Profesional de Brochas LizGlam",
-    category: "brochas",
-    price: 110000,
-    description: "8 brochas ultra suaves de pelo sintético premiun con mango de madera rosada.",
-    image_url: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80",
-    stock: 8,
-    rating: 4.9,
-    reviewsCount: 50,
     active: true
   }
 ];
@@ -93,7 +95,7 @@ const SEED_SERVICES = [
     name: "Maquillaje Social & Fiesta",
     duration: "60 min",
     price: 90000,
-    description: "Maquillaje profesional personalizado para eventos sociales, incluye pestañas de tira y sellado de larga duración.",
+    description: "Maquillaje profesional personalizado para eventos sociales con pestañas incluidas.",
     image_url: "/assets/service-makeup.jpg",
     availability: "Lunes a Sábado",
     active: true
@@ -103,37 +105,24 @@ const SEED_SERVICES = [
     name: "Maquillaje Novia Glam Premier",
     duration: "90 min",
     price: 180000,
-    description: "Experiencia de lujo para novias: prueba previa, preparación de piel con sueros botánicos, peinado glam y fijación resistente a lágrimas.",
+    description: "Experiencia de lujo para novias con prueba previa y peinado glam.",
     image_url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80",
     availability: "Previa Cita",
-    active: true
-  },
-  {
-    id: "serv_3",
-    name: "Lifting & Laminado de Pestañas",
-    duration: "45 min",
-    price: 65000,
-    description: "Rizado natural y tinte de pestañas efecto rímel por 4 a 6 semanas.",
-    image_url: "https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&w=600&q=80",
-    availability: "Martes a Sábado",
     active: true
   }
 ];
 
-const SEED_COMBOS = [
+const SEED_BANNERS = [
   {
-    id: "combo_1",
-    name: "Combo Glam Total: Maquillaje Social + Labial Velvet",
-    price: 115000,
-    original_price: 128000,
-    description: "Obtén el servicio de maquillaje social completo y llévate el Labial Velvet Rose a un precio preferencial.",
-    items: ["Maquillaje Social & Fiesta", "Labial Velvet Rose Mat"],
-    active: true
+    id: "hero_banner_1",
+    title: "Resalta tu Belleza Natural con Elegancia",
+    subtitle: "COSMÉTICOS & ESTUDIO DE MAQUILLAJE",
+    desc: "Explora nuestra colección exclusiva de cosméticos profesionales y reserva experiencias de maquillaje de alto impacto.",
+    image_url: "/assets/hero-banner.jpg"
   }
 ];
 
 module.exports = async function handler(req, res) {
-  // Enable CORS headers for client requests
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -142,7 +131,6 @@ module.exports = async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Parse Action & Query Parameters
   const urlParams = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   let action = urlParams.searchParams.get('action') || (req.body && req.body.action);
 
@@ -153,6 +141,7 @@ module.exports = async function handler(req, res) {
 
   try {
     switch (action) {
+      // 1. PRODUCTS
       case 'getProducts': {
         const category = urlParams.searchParams.get('category');
         const search = urlParams.searchParams.get('search');
@@ -165,7 +154,7 @@ module.exports = async function handler(req, res) {
               products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             }
           } catch (e) {
-            console.error('Firestore getProducts error, falling back to seed data:', e);
+            console.error('Firestore getProducts error:', e);
           }
         }
 
@@ -174,12 +163,44 @@ module.exports = async function handler(req, res) {
         }
         if (search) {
           const q = search.toLowerCase();
-          products = products.filter(p => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
+          products = products.filter(p => p.name.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q)));
         }
 
         return res.status(200).json({ success: true, products });
       }
 
+      case 'saveProduct': {
+        const productData = req.body;
+        if (!productData || !productData.name) {
+          return res.status(400).json({ success: false, error: 'Información de producto incompleta' });
+        }
+        if (db) {
+          const docRef = productData.id ? db.collection('products').doc(productData.id) : db.collection('products').doc();
+          const cleanProduct = {
+            name: productData.name,
+            category: productData.category || 'bases',
+            price: Number(productData.price) || 0,
+            image_url: productData.image_url || '/assets/foundation.jpg',
+            description: productData.description || '',
+            shades: productData.shades || [],
+            stock: Number(productData.stock) || 10,
+            active: true,
+            updatedAt: new Date().toISOString()
+          };
+          await docRef.set(cleanProduct, { merge: true });
+        }
+        return res.status(200).json({ success: true, message: 'Producto guardado exitosamente' });
+      }
+
+      case 'deleteProduct': {
+        const { id } = req.body || {};
+        if (db && id) {
+          await db.collection('products').doc(id).delete();
+        }
+        return res.status(200).json({ success: true, message: 'Producto eliminado' });
+      }
+
+      // 2. SERVICES
       case 'getServices': {
         let services = SEED_SERVICES;
         if (db) {
@@ -195,26 +216,181 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ success: true, services });
       }
 
-      case 'getCombos': {
-        let combos = SEED_COMBOS;
-        if (db) {
-          try {
-            const snapshot = await db.collection('combos').where('active', '==', true).get();
-            if (!snapshot.empty) {
-              combos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            }
-          } catch (e) {
-            console.error('Firestore getCombos error:', e);
-          }
+      case 'saveService': {
+        const serviceData = req.body;
+        if (!serviceData || !serviceData.name) {
+          return res.status(400).json({ success: false, error: 'Información de servicio incompleta' });
         }
-        return res.status(200).json({ success: true, combos });
+        if (db) {
+          const docRef = serviceData.id ? db.collection('services').doc(serviceData.id) : db.collection('services').doc();
+          await docRef.set({
+            name: serviceData.name,
+            duration: serviceData.duration || '60 min',
+            price: Number(serviceData.price) || 0,
+            description: serviceData.description || '',
+            image_url: serviceData.image_url || '/assets/service-makeup.jpg',
+            availability: serviceData.availability || 'Lunes a Sábado',
+            active: true,
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
+        }
+        return res.status(200).json({ success: true, message: 'Servicio guardado exitosamente' });
       }
 
+      // 3. BANNERS
+      case 'getBanners': {
+        let banners = SEED_BANNERS;
+        if (db) {
+          try {
+            const snapshot = await db.collection('banners').get();
+            if (!snapshot.empty) {
+              banners = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            }
+          } catch (e) {
+            console.error('Firestore getBanners error:', e);
+          }
+        }
+        return res.status(200).json({ success: true, banners });
+      }
+
+      case 'saveBanner': {
+        const bannerData = req.body;
+        if (db && bannerData) {
+          const ref = db.collection('banners').doc(bannerData.id || 'hero_banner_1');
+          await ref.set({
+            ...bannerData,
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
+        }
+        return res.status(200).json({ success: true, message: 'Banner actualizado' });
+      }
+
+      // 4. CLOUDFLARE R2 IMAGE UPLOAD
+      case 'uploadImage': {
+        const { base64Data, fileName } = req.body || {};
+        if (!base64Data) {
+          return res.status(400).json({ success: false, error: 'Base64 data is required' });
+        }
+
+        const cleanBase64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(cleanBase64, 'base64');
+        const key = `uploads/${Date.now()}_${fileName || 'image.jpg'}`;
+
+        if (s3Client) {
+          try {
+            const { PutObjectCommand } = require('@aws-sdk/client-s3');
+            await s3Client.send(new PutObjectCommand({
+              Bucket: r2Bucket,
+              Key: key,
+              Body: buffer,
+              ContentType: 'image/jpeg'
+            }));
+
+            const finalUrl = r2PublicDomain
+              ? `${r2PublicDomain.replace(/\/$/, '')}/${key}`
+              : `https://${r2Bucket}.r2.cloudflarestorage.com/${key}`;
+
+            return res.status(200).json({ success: true, image_url: finalUrl });
+          } catch (err) {
+            console.error('R2 PutObject error:', err);
+          }
+        }
+
+        // Base64 Data URL fallback if R2 not configured
+        const dataUrl = `data:image/jpeg;base64,${cleanBase64}`;
+        return res.status(200).json({ success: true, image_url: dataUrl, notice: 'Utilizando Base64 fallback (configura R2_ACCESS_KEY_ID en Vercel para CDN permanente)' });
+      }
+
+      // 5. PAYMENT LINKS / COBRO
+      case 'createPaymentLink': {
+        const { customerName, amount, description, paymentMethod } = req.body || {};
+        const linkData = {
+          id: "cobro_" + Math.random().toString(36).substring(2, 8),
+          customerName: customerName || 'Cliente',
+          amount: Number(amount) || 0,
+          description: description || 'Servicio / Productos de Maquillaje LizGlam',
+          paymentMethod: paymentMethod || 'Nequi / Bancolombia',
+          status: 'pending',
+          createdAt: new Date().toISOString()
+        };
+
+        if (db) {
+          await db.collection('payment_links').doc(linkData.id).set(linkData);
+        }
+        return res.status(200).json({ success: true, paymentLink: linkData });
+      }
+
+      case 'getPaymentLinks': {
+        let links = [];
+        if (db) {
+          const snapshot = await db.collection('payment_links').orderBy('createdAt', 'desc').get();
+          links = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        }
+        return res.status(200).json({ success: true, links });
+      }
+
+      // 6. USERS & ROLES
+      case 'syncUser': {
+        const { uid, email, displayName, photoURL } = req.body || {};
+        if (!uid) return res.status(400).json({ success: false, error: 'UID is required' });
+
+        let userData = {
+          uid,
+          email: email || '',
+          displayName: displayName || email || 'Cliente',
+          photoURL: photoURL || '',
+          updatedAt: new Date().toISOString()
+        };
+
+        if (db) {
+          try {
+            const userRef = db.collection('users').doc(uid);
+            const userDoc = await userRef.get();
+            if (!userDoc.exists) {
+              userData.role = (email === 'admin@lizglam.happycorner.top' || email.includes('admin')) ? 'admin' : 'user';
+              userData.createdAt = new Date().toISOString();
+              await userRef.set(userData);
+            } else {
+              userData = { ...userDoc.data(), ...userData };
+              await userRef.update({
+                displayName: userData.displayName,
+                photoURL: userData.photoURL,
+                updatedAt: userData.updatedAt
+              });
+            }
+          } catch (e) {
+            console.error('Firestore syncUser error:', e);
+          }
+        }
+        return res.status(200).json({ success: true, user: userData });
+      }
+
+      case 'getUsers': {
+        let users = [];
+        if (db) {
+          try {
+            const snapshot = await db.collection('users').get();
+            users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          } catch (e) {
+            console.error('Firestore getUsers error:', e);
+          }
+        }
+        return res.status(200).json({ success: true, users });
+      }
+
+      case 'setUserRole': {
+        const { uid, role } = req.body || {};
+        if (!uid || !role) return res.status(400).json({ success: false, error: 'UID and role required' });
+        if (db) {
+          await db.collection('users').doc(uid).set({ role, updatedAt: new Date().toISOString() }, { merge: true });
+        }
+        return res.status(200).json({ success: true, message: `Rol actualizado a ${role}` });
+      }
+
+      // 7. CARTS & ORDERS
       case 'saveCart': {
         const { userId, items } = req.body || {};
-        if (!userId) {
-          return res.status(400).json({ success: false, error: 'User ID required' });
-        }
+        if (!userId) return res.status(400).json({ success: false, error: 'User ID required' });
         if (db) {
           await db.collection('saved_carts').doc(userId).set({
             user_id: userId,
@@ -227,15 +403,11 @@ module.exports = async function handler(req, res) {
 
       case 'getUserCart': {
         const userId = urlParams.searchParams.get('userId');
-        if (!userId) {
-          return res.status(400).json({ success: false, error: 'User ID required' });
-        }
+        if (!userId) return res.status(400).json({ success: false, error: 'User ID required' });
         let cart = { items: [] };
         if (db) {
           const doc = await db.collection('saved_carts').doc(userId).get();
-          if (doc.exists) {
-            cart = doc.data();
-          }
+          if (doc.exists) cart = doc.data();
         }
         return res.status(200).json({ success: true, cart });
       }
@@ -298,35 +470,11 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      case 'saveProduct': {
-        const productData = req.body;
-        if (!productData || !productData.name) {
-          return res.status(400).json({ success: false, error: 'Invalid product data' });
-        }
-        if (db) {
-          const docRef = productData.id ? db.collection('products').doc(productData.id) : db.collection('products').doc();
-          await docRef.set({
-            ...productData,
-            updated_at: new Date().toISOString()
-          }, { merge: true });
-        }
-        return res.status(200).json({ success: true, message: 'Producto guardado' });
-      }
-
-      case 'deleteProduct': {
-        const { id } = req.body || {};
-        if (db && id) {
-          await db.collection('products').doc(id).delete();
-        }
-        return res.status(200).json({ success: true, message: 'Producto eliminado' });
-      }
-
       default:
         return res.status(200).json({
           success: true,
           name: "LizGlam API",
-          status: "online",
-          actions: ["getProducts", "getServices", "getCombos", "saveCart", "getUserCart", "logOrder", "getOrders", "getAnalytics", "saveProduct", "deleteProduct"]
+          status: "online"
         });
     }
   } catch (err) {
