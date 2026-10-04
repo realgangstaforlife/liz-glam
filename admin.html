@@ -76,16 +76,16 @@
 
     /* Modal Overlay Override */
     .admin-modal-root {
-      position: fixed !important;
-      inset: 0 !important;
-      background: rgba(28, 23, 24, 0.75) !important;
-      backdrop-filter: blur(6px) !important;
-      -webkit-backdrop-filter: blur(6px) !important;
-      z-index: 999999 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      padding: 1rem !important;
+      position: fixed;
+      inset: 0;
+      background: rgba(28, 23, 24, 0.75);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 999999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
     }
 
     @media (max-width: 768px) {
@@ -364,9 +364,14 @@
   <!-- MODALS PLACED DIRECTLY AT ROOT BODY -->
 
   <!-- Product Modal -->
-  <div id="productModal" class="admin-modal-root" style="display: none;">
+  <div id="productModal" class="admin-modal-root" style="display: none;" onclick="if(event.target === this) closeProductModal()">
     <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;">
-      <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Nuevo / Editar Producto</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h3 class="font-serif" style="font-size: 1.5rem; margin: 0;">Nuevo / Editar Producto</h3>
+        <button type="button" onclick="closeProductModal()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; padding: 0.2rem;" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
       <form id="productForm" onsubmit="saveProduct(event)">
         <input type="hidden" id="pId">
         <div class="form-group">
@@ -417,9 +422,14 @@
   </div>
 
   <!-- Service Modal -->
-  <div id="serviceModal" class="admin-modal-root" style="display: none;">
+  <div id="serviceModal" class="admin-modal-root" style="display: none;" onclick="if(event.target === this) closeServiceModal()">
     <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
-      <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Nuevo Servicio</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h3 class="font-serif" style="font-size: 1.5rem; margin: 0;">Nuevo Servicio</h3>
+        <button type="button" onclick="closeServiceModal()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; padding: 0.2rem;" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
       <form id="serviceForm" onsubmit="saveService(event)">
         <div class="form-group">
           <label>Nombre del Servicio</label>
@@ -457,9 +467,14 @@
   </div>
 
   <!-- Banner Modal -->
-  <div id="bannerModal" class="admin-modal-root" style="display: none;">
+  <div id="bannerModal" class="admin-modal-root" style="display: none;" onclick="if(event.target === this) closeBannerModal()">
     <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
-      <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Agregar Banner a Carrusel</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h3 class="font-serif" style="font-size: 1.5rem; margin: 0;">Agregar Banner a Carrusel</h3>
+        <button type="button" onclick="closeBannerModal()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; padding: 0.2rem;" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
       <form id="bannerModalForm" onsubmit="saveBanner(event)">
         <div class="form-group">
           <label>Título Principal</label>
@@ -488,10 +503,53 @@
     </div>
   </div>
 
-  <!-- Payment Link Modal -->
-  <div id="paymentModal" class="admin-modal-root" style="display: none;">
+  <!-- Review Modal (Admin) -->
+  <div id="reviewModalAdmin" class="admin-modal-root" style="display: none;" onclick="if(event.target === this) closeReviewModalAdmin()">
     <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 480px;">
-      <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Crear Link de Cobro</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h3 class="font-serif" style="font-size: 1.5rem; margin: 0;">Publicar Reseña Oficial</h3>
+        <button type="button" onclick="closeReviewModalAdmin()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; padding: 0.2rem;" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <form onsubmit="saveOfficialReview(event)">
+        <div class="form-group">
+          <label>Nombre del Cliente</label>
+          <input type="text" id="revAdminUser" class="form-control" required placeholder="Ej: Camila R.">
+        </div>
+        <div class="form-group">
+          <label>Calificación (Estrellas)</label>
+          <select id="revAdminRating" class="form-control">
+            <option value="5">★★★★★ (5/5)</option>
+            <option value="4">★★★★☆ (4/5)</option>
+            <option value="3">★★★☆☆ (3/5)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Título de la Reseña</label>
+          <input type="text" id="revAdminTitle" class="form-control" required placeholder="Ej: ¡Increíble la base y la atención!">
+        </div>
+        <div class="form-group">
+          <label>Contenido de la Reseña</label>
+          <textarea id="revAdminContent" class="form-control" rows="3" required placeholder="Detalles del testimonio..."></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button type="button" onclick="closeReviewModalAdmin()" class="btn btn-sm btn-secondary" style="flex: 1;">Cancelar</button>
+          <button type="submit" class="btn btn-sm btn-primary" style="flex: 1;">Publicar Reseña</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Payment Link Modal -->
+  <div id="paymentModal" class="admin-modal-root" style="display: none;" onclick="if(event.target === this) closePaymentModal()">
+    <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 480px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h3 class="font-serif" style="font-size: 1.5rem; margin: 0;">Crear Link de Cobro</h3>
+        <button type="button" onclick="closePaymentModal()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; padding: 0.2rem;" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
       <form onsubmit="createPaymentLink(event)">
         <div class="form-group">
           <label>Nombre del Cliente</label>
@@ -805,6 +863,40 @@
     }
     function closePaymentModal() {
       document.getElementById('paymentModal').style.display = 'none';
+    }
+
+    function openReviewModalAdmin() {
+      document.getElementById('reviewModalAdmin').style.display = 'flex';
+    }
+    function closeReviewModalAdmin() {
+      document.getElementById('reviewModalAdmin').style.display = 'none';
+    }
+
+    async function saveOfficialReview(e) {
+      e.preventDefault();
+      const review = {
+        userName: document.getElementById('revAdminUser').value,
+        rating: Number(document.getElementById('revAdminRating').value) || 5,
+        title: document.getElementById('revAdminTitle').value,
+        content: document.getElementById('revAdminContent').value,
+        status: 'approved'
+      };
+
+      try {
+        const res = await fetch('/api/account?action=saveReview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(review)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Reseña oficial publicada ✨');
+          closeReviewModalAdmin();
+          loadAdminData();
+        }
+      } catch (err) {
+        showToast('Error al publicar reseña', 'error');
+      }
     }
 
     async function saveProduct(e) {
