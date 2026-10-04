@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LizGlam Beauty [VERSIÓN ANTERIOR - PLAYFAIR & MONTSERRAT]</title>
+  <meta name="description" content="Versión comparativa con tipografía Playfair Display y Montserrat.">
+
+  <!-- Icons & Fonts (Playfair Display & Montserrat) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="/styles/components.css">
+
+  <style>
+    /* Override font family to Playfair Display & Montserrat for comparison */
+    body {
+      font-family: 'Montserrat', sans-serif !important;
+    }
+    h1, h2, h3, h4, .font-serif, .brand-logo {
+      font-family: 'Playfair Display', Georgia, serif !important;
+      text-transform: none !important;
+      font-weight: 600 !important;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif !important;
+      font-size: 3.5rem !important;
+      line-height: 1.15 !important;
+    }
+    .comparison-banner {
+      background: #1C1C1C;
+      color: #FFF;
+      text-align: center;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      font-family: 'Montserrat', sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Comparison Banner Notice -->
+  <div class="comparison-banner">
+    ⚠️ <strong>VERSIÓN ANTERIOR (COMPARATIVA):</strong> Fuente <em>Playfair Display</em> en títulos y <em>Montserrat</em> en texto. Para ver la fuente actual de Atenea (<em>Arimo</em>), abre <strong>index.html</strong>.
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <a href="/oldindex.html" class="brand-logo">
+        LIZGLAM<span class="dot">.</span>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/index.html" style="color: #c77b89; font-weight: 700;">← Ver con Fuente Arimo (Atenea)</a></li>
+        <li><a href="/productos.html">Productos</a></li>
+        <li><a href="/servicios.html">Servicios & Citas</a></li>
+        <li><a href="/carrito.html">Carrito</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="/carrito.html" class="icon-btn cart-toggle-btn" title="Carrito">
+          <i class="bi bi-bag"></i>
+          <span class="badge cart-badge">0</span>
+        </a>
+        <div id="navAuthContainer">
+          <button onclick="window.authManager.signInWithGoogle()" class="btn btn-sm btn-outline-rose">
+            <i class="bi bi-google"></i> Ingresar
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-content">
+      <span class="hero-tag">Cosméticos & Estudio de Maquillaje</span>
+      <h1 class="hero-title font-serif">Resalta tu Belleza Natural con Elegancia</h1>
+      <p class="hero-desc">Explora nuestra colección exclusiva de cosméticos profesionales y reserva experiencias de maquillaje de alto impacto.</p>
+      <div class="hero-btns">
+        <a href="/productos.html" class="btn btn-primary">
+          <i class="bi bi-bag-heart"></i> Explorar Tienda
+        </a>
+        <a href="/servicios.html" class="btn btn-secondary" style="color: #FFF; border-color: #FFF;">
+          <i class="bi bi-calendar-event"></i> Reservar Cita
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Container -->
+  <main class="container" style="padding-top: 4rem;">
+
+    <!-- Category Filters -->
+    <div class="category-filter">
+      <button onclick="window.lizGlamApp.setCategory('all')" class="filter-pill active" data-category="all">Todos</button>
+      <button onclick="window.lizGlamApp.setCategory('bases')" class="filter-pill" data-category="bases">Bases</button>
+      <button onclick="window.lizGlamApp.setCategory('labiales')" class="filter-pill" data-category="labiales">Labiales</button>
+      <button onclick="window.lizGlamApp.setCategory('sombras')" class="filter-pill" data-category="sombras">Sombras</button>
+      <button onclick="window.lizGlamApp.setCategory('rubores')" class="filter-pill" data-category="rubores">Rubores</button>
+      <button onclick="window.lizGlamApp.setCategory('brochas')" class="filter-pill" data-category="brochas">Brochas</button>
+    </div>
+
+    <!-- Products Catalog Grid -->
+    <section style="margin-bottom: 5rem;">
+      <div class="section-title">
+        <span>COLECCIÓN EXCLUSIVA</span>
+        <h2>Productos Destacados</h2>
+      </div>
+      <div id="productGrid" class="product-grid">
+        <!-- Loaded dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- Services Section -->
+    <section style="margin-bottom: 5rem;" id="servicios">
+      <div class="section-title">
+        <span>ESTUDIO PROFESIONAL</span>
+        <h2>Servicios & Maquillaje</h2>
+      </div>
+      <div id="servicesGrid" class="services-grid">
+        <!-- Loaded dynamically via JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-bottom" style="border: none; padding: 2rem 0;">
+      <p>&copy; 2026 LizGlam Beauty Store. @lizglamstore</p>
+    </div>
+  </footer>
+
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <!-- JS Modules -->
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/instagram.js"></script>
+  <script src="/js/app.js"></script>
+
+</body>
+</html>
