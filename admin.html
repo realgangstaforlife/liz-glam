@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración | LizGlam Beauty</title>
-  <meta name="description" content="Panel de administración de LizGlam Beauty Store. Gestión de productos, servicios, usuarios y pedidos de Instagram.">
+  <meta name="description" content="Panel de administración protegido para gestión de catálogo, citas, banners, cobros y usuarios de LizGlam.">
 
   <!-- Icons & Fonts -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -16,201 +16,267 @@
 <body style="background: var(--bg-alt);">
 
   <!-- Top Navigation Bar -->
-  <nav class="navbar" style="background: var(--bg-dark); color: #FFF;">
+  <nav class="navbar" style="background: var(--text-main); color: #FFF;">
     <div class="container navbar-inner">
       <a href="/" class="brand-logo" style="color: #FFF;">
-        LIZGLAM<span class="dot" style="color: var(--rose-gold);">.</span> <span style="font-size: 0.8rem; font-weight: 400; text-transform: uppercase; opacity: 0.7; font-family: var(--font-sans);">[Admin Panel]</span>
+        LIZGLAM<span class="dot" style="color: var(--rose-gold);">.</span> <span style="font-size: 0.75rem; font-weight: 400; text-transform: uppercase; opacity: 0.8;">[ADMIN PANEL]</span>
       </a>
       <div style="display: flex; align-items: center; gap: 1rem;">
-        <div id="adminUserStatus" style="font-size: 0.85rem;"></div>
-        <a href="/" class="btn btn-sm btn-outline-rose" style="color: #FFF; border-color: var(--rose-gold);">
+        <div id="adminUserStatus"></div>
+        <a href="/" class="btn btn-sm btn-outline-rose" style="color: #FFF; border-color: #FFF;">
           <i class="bi bi-house"></i> Volver a la Tienda
         </a>
       </div>
     </div>
   </nav>
 
-  <!-- Admin Header -->
-  <div style="background: var(--bg-main); padding: 2.5rem 0; border-bottom: 1px solid var(--border-subtle);">
-    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
-      <div>
-        <h1 class="font-serif" style="font-size: 2.25rem;">Panel de Control</h1>
-        <p style="color: var(--text-muted);">Gestiona tu inventario, citas, usuarios y pedidos de Instagram.</p>
-      </div>
-      <div>
-        <button onclick="loadAdminData()" class="btn btn-sm btn-primary">
-          <i class="bi bi-arrow-clockwise"></i> Actualizar Datos
-        </button>
-      </div>
+  <!-- Access Denied Screen (Shown if user is not Admin) -->
+  <div id="accessDeniedContainer" style="display: none; padding: 5rem 1rem; text-align: center;">
+    <div class="container" style="max-width: 550px; background: #FFF; padding: 3.5rem 2rem; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-md);">
+      <i class="bi bi-shield-lock" style="font-size: 3.5rem; color: var(--rose-gold); display: block; margin-bottom: 1rem;"></i>
+      <h2 class="font-serif" style="font-size: 2rem; margin-bottom: 0.5rem;">Acceso Restringido</h2>
+      <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">
+        El panel de administración requiere una cuenta con permisos de <strong>Administrador</strong>. Inicia sesión para continuar.
+      </p>
+      <button onclick="window.authManager.signInWithGoogle()" class="btn btn-primary btn-full">
+        <i class="bi bi-google"></i> Iniciar Sesión como Administrador
+      </button>
     </div>
   </div>
 
-  <!-- Admin Main Content -->
-  <main class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
+  <!-- Admin Main Dashboard Content -->
+  <div id="adminDashboardContent" style="display: block;">
 
-    <!-- Analytics Cards Row -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
-      
-      <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
-        <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--rose-gold-light); color: var(--rose-gold-dark); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-          <i class="bi bi-box-seam"></i>
+    <!-- Admin Header -->
+    <div style="background: var(--bg-main); padding: 2.5rem 0; border-bottom: 1px solid var(--border-subtle);">
+      <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h1 class="font-serif" style="font-size: 2.25rem;">Panel de Administración</h1>
+          <p style="color: var(--text-muted);">Gestión de catálogo, imágenes en Cloudflare R2, banners, citas y links de cobro.</p>
         </div>
         <div>
-          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Productos</div>
-          <div id="statProducts" style="font-size: 1.75rem; font-weight: 700; font-family: var(--font-serif);">0</div>
+          <button onclick="loadAdminData()" class="btn btn-sm btn-primary">
+            <i class="bi bi-arrow-clockwise"></i> Actualizar Datos
+          </button>
         </div>
-      </div>
-
-      <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
-        <div style="width: 50px; height: 50px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-          <i class="bi bi-scissors"></i>
-        </div>
-        <div>
-          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Servicios</div>
-          <div id="statServices" style="font-size: 1.75rem; font-weight: 700; font-family: var(--font-serif);">0</div>
-        </div>
-      </div>
-
-      <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
-        <div style="width: 50px; height: 50px; border-radius: 50%; background: #fce7f3; color: #db2777; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-          <i class="bi bi-people"></i>
-        </div>
-        <div>
-          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Usuarios</div>
-          <div id="statUsers" style="font-size: 1.75rem; font-weight: 700; font-family: var(--font-serif);">0</div>
-        </div>
-      </div>
-
-      <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
-        <div style="width: 50px; height: 50px; border-radius: 50%; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-          <i class="bi bi-currency-dollar"></i>
-        </div>
-        <div>
-          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Ventas Est.</div>
-          <div id="statRevenue" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">$ 0</div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Admin Section Tabs -->
-    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-subtle); padding-bottom: 0.5rem; flex-wrap: wrap;">
-      <button onclick="switchTab('products')" class="btn btn-sm filter-pill active" id="tabBtnProducts">Inventario de Productos</button>
-      <button onclick="switchTab('services')" class="btn btn-sm filter-pill" id="tabBtnServices">Servicios & Citas</button>
-      <button onclick="switchTab('users')" class="btn btn-sm filter-pill" id="tabBtnUsers">Usuarios Registrados & Roles</button>
-      <button onclick="switchTab('orders')" class="btn btn-sm filter-pill" id="tabBtnOrders">Historial de Pedidos IG</button>
-    </div>
-
-    <!-- Tab 1: Products Management -->
-    <div id="tabProducts" class="admin-card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h3 class="font-serif" style="font-size: 1.5rem;">Productos en Catálogo</h3>
-        <button onclick="openProductModal()" class="btn btn-sm btn-primary">
-          <i class="bi bi-plus-lg"></i> Agregar Producto
-        </button>
-      </div>
-
-      <div class="table-responsive">
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>Imagen</th>
-              <th>Nombre</th>
-              <th>Categoría</th>
-              <th>Precio</th>
-              <th>Stock</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="productsTableBody">
-            <!-- Loaded dynamically -->
-          </tbody>
-        </table>
       </div>
     </div>
 
-    <!-- Tab 2: Services Management -->
-    <div id="tabServices" class="admin-card" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h3 class="font-serif" style="font-size: 1.5rem;">Servicios de Maquillaje</h3>
+    <!-- Admin Main Container -->
+    <main class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
+
+      <!-- Analytics Cards Row -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+        <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--bg-alt); color: var(--text-main); display: flex; align-items: center; justify-content: center; font-size: 1.35rem;">
+            <i class="bi bi-box-seam"></i>
+          </div>
+          <div>
+            <div style="font-size: 0.725rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Productos</div>
+            <div id="statProducts" style="font-size: 1.6rem; font-weight: 700; font-family: var(--font-serif);">0</div>
+          </div>
+        </div>
+
+        <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.35rem;">
+            <i class="bi bi-scissors"></i>
+          </div>
+          <div>
+            <div style="font-size: 0.725rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Servicios</div>
+            <div id="statServices" style="font-size: 1.6rem; font-weight: 700; font-family: var(--font-serif);">0</div>
+          </div>
+        </div>
+
+        <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: #fce7f3; color: #db2777; display: flex; align-items: center; justify-content: center; font-size: 1.35rem;">
+            <i class="bi bi-people"></i>
+          </div>
+          <div>
+            <div style="font-size: 0.725rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Usuarios</div>
+            <div id="statUsers" style="font-size: 1.6rem; font-weight: 700; font-family: var(--font-serif);">0</div>
+          </div>
+        </div>
+
+        <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.35rem;">
+            <i class="bi bi-currency-dollar"></i>
+          </div>
+          <div>
+            <div style="font-size: 0.725rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Ventas Est.</div>
+            <div id="statRevenue" style="font-size: 1.4rem; font-weight: 700; font-family: var(--font-serif);">$ 0</div>
+          </div>
+        </div>
       </div>
 
-      <div class="table-responsive">
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>Servicio</th>
-              <th>Duración</th>
-              <th>Precio</th>
-              <th>Disponibilidad</th>
-            </tr>
-          </thead>
-          <tbody id="servicesTableBody">
-            <!-- Loaded dynamically -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Tab 3: Users & Roles Management -->
-    <div id="tabUsers" class="admin-card" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h3 class="font-serif" style="font-size: 1.5rem;">Usuarios Registrados en Firestore</h3>
-        <p style="font-size: 0.85rem; color: var(--text-muted);">Haz clic en el rol para cambiar a <strong>admin</strong> o <strong>user</strong>.</p>
+      <!-- Admin Section Tabs -->
+      <div style="display: flex; gap: 0.75rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-subtle); padding-bottom: 0.5rem; flex-wrap: wrap;">
+        <button onclick="switchTab('products')" class="btn btn-sm filter-pill active" id="tabBtnProducts">Inventario de Productos</button>
+        <button onclick="switchTab('services')" class="btn btn-sm filter-pill" id="tabBtnServices">Servicios & Citas</button>
+        <button onclick="switchTab('banners')" class="btn btn-sm filter-pill" id="tabBtnBanners">Banners & Portada</button>
+        <button onclick="switchTab('payments')" class="btn btn-sm filter-pill" id="tabBtnPayments">Links de Cobro</button>
+        <button onclick="switchTab('users')" class="btn btn-sm filter-pill" id="tabBtnUsers">Usuarios & Roles</button>
+        <button onclick="switchTab('orders')" class="btn btn-sm filter-pill" id="tabBtnOrders">Historial Pedidos IG</button>
       </div>
 
-      <div class="table-responsive">
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>Usuario</th>
-              <th>Email</th>
-              <th>UID</th>
-              <th>Rol Actual</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody id="usersTableBody">
-            <!-- Loaded dynamically -->
-          </tbody>
-        </table>
+      <!-- Tab 1: Products Management -->
+      <div id="tabProducts" class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <h3 class="font-serif" style="font-size: 1.5rem;">Catálogo de Productos</h3>
+          <button onclick="openProductModal()" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg"></i> Agregar Producto
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Imagen</th>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Tonos</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody"></tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-    <!-- Tab 4: Orders History -->
-    <div id="tabOrders" class="admin-card" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h3 class="font-serif" style="font-size: 1.5rem;">Pedidos Redirigidos a Instagram</h3>
+      <!-- Tab 2: Services Management -->
+      <div id="tabServices" class="admin-card" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <h3 class="font-serif" style="font-size: 1.5rem;">Servicios & Citas de Maquillaje</h3>
+          <button onclick="openServiceModal()" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg"></i> Agregar Servicio
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Imagen</th>
+                <th>Servicio</th>
+                <th>Duración</th>
+                <th>Precio</th>
+                <th>Disponibilidad</th>
+              </tr>
+            </thead>
+            <tbody id="servicesTableBody"></tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="table-responsive">
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Cliente</th>
-              <th>Canal</th>
-              <th>Ítems</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody id="ordersTableBody">
-            <!-- Loaded dynamically -->
-          </tbody>
-        </table>
+      <!-- Tab 3: Banner & Hero Management -->
+      <div id="tabBanners" class="admin-card" style="display: none;">
+        <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1rem;">Configuración de Banners & Portada</h3>
+        <form id="bannerForm" onsubmit="saveBannerConfig(event)" style="max-width: 650px;">
+          <div class="form-group">
+            <label>Título Principal de Portada</label>
+            <input type="text" id="bTitle" class="form-control" placeholder="Ej: Resalta tu Belleza Natural con Elegancia">
+          </div>
+          <div class="form-group">
+            <label>Subtítulo Superior</label>
+            <input type="text" id="bSubtitle" class="form-control" placeholder="Ej: COSMÉTICOS & ESTUDIO DE MAQUILLAJE">
+          </div>
+          <div class="form-group">
+            <label>Descripción</label>
+            <textarea id="bDesc" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Subir Imagen de Banner (Cloudflare R2)</label>
+            <input type="file" id="bFileInput" class="form-control" accept="image/*" onchange="uploadFileToR2(this, 'bImageUrl', 'bImagePreview')">
+            <input type="hidden" id="bImageUrl">
+            <div id="bImagePreview" style="margin-top: 0.75rem;"></div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+            <i class="bi bi-check2-circle"></i> Guardar Banner de Portada
+          </button>
+        </form>
       </div>
-    </div>
 
-  </main>
+      <!-- Tab 4: Payment Links / Cobro -->
+      <div id="tabPayments" class="admin-card" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <h3 class="font-serif" style="font-size: 1.5rem;">Generador de Links de Cobro</h3>
+          <button onclick="openPaymentModal()" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg"></i> Crear Nuevo Cobro
+          </button>
+        </div>
 
-  <!-- Add Product Modal -->
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Concepto</th>
+                <th>Monto</th>
+                <th>Método</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="paymentLinksTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 5: Users & Roles Management -->
+      <div id="tabUsers" class="admin-card" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <h3 class="font-serif" style="font-size: 1.5rem;">Usuarios Registrados en Firestore</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Modifica el rol de cualquier usuario registrado.</p>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>UID</th>
+                <th>Rol Actual</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 6: Orders History -->
+      <div id="tabOrders" class="admin-card" style="display: none;">
+        <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Pedidos Redirigidos a Instagram</h3>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Canal</th>
+                <th>Ítems</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Product Modal (with File Upload & Color Shades) -->
   <div id="productModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); z-index: 4000; align-items: center; justify-content: center;">
-    <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
-      <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Nuevo Producto</h3>
+    <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;">
+      <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Nuevo / Editar Producto</h3>
       <form id="productForm" onsubmit="saveProduct(event)">
+        <input type="hidden" id="pId">
         <div class="form-group">
           <label>Nombre del Producto</label>
-          <input type="text" id="pName" class="form-control" required placeholder="Ej: Labial Velvet Rose">
+          <input type="text" id="pName" class="form-control" required placeholder="Ej: Base Aurélia Sélection Nude">
         </div>
         <div class="form-group">
           <label>Categoría</label>
@@ -224,20 +290,105 @@
         </div>
         <div class="form-group">
           <label>Precio (COP)</label>
-          <input type="number" id="pPrice" class="form-control" required placeholder="38000">
+          <input type="number" id="pPrice" class="form-control" required placeholder="68000">
         </div>
         <div class="form-group">
-          <label>URL de Imagen</label>
-          <input type="text" id="pImage" class="form-control" required placeholder="https://...">
+          <label>Subir Imagen del Producto (Cloudflare R2)</label>
+          <input type="file" id="pFileInput" class="form-control" accept="image/*" onchange="uploadFileToR2(this, 'pImage', 'pImagePreview')">
+          <input type="hidden" id="pImage">
+          <div id="pImagePreview" style="margin-top: 0.5rem;"></div>
         </div>
+        
+        <!-- Color Shades Section -->
+        <div class="form-group" style="background: var(--bg-alt); padding: 1rem; border-radius: var(--radius-md);">
+          <label style="margin-bottom: 0.5rem;">Variantes de Color / Tonos</label>
+          <div id="shadesContainer" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem;"></div>
+          <button type="button" onclick="addShadeInput()" class="btn btn-sm btn-outline-rose" style="width: 100%;">
+            <i class="bi bi-plus-circle"></i> Agregar Tono de Color
+          </button>
+        </div>
+
         <div class="form-group">
           <label>Descripción</label>
-          <textarea id="pDesc" class="form-control" rows="3" placeholder="Detalles del producto..."></textarea>
+          <textarea id="pDesc" class="form-control" rows="2" placeholder="Detalles del producto..."></textarea>
         </div>
 
         <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
           <button type="button" onclick="closeProductModal()" class="btn btn-sm btn-secondary" style="flex: 1;">Cancelar</button>
           <button type="submit" class="btn btn-sm btn-primary" style="flex: 1;">Guardar Producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Service Modal -->
+  <div id="serviceModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); z-index: 4000; align-items: center; justify-content: center;">
+    <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+      <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Nuevo Servicio</h3>
+      <form id="serviceForm" onsubmit="saveService(event)">
+        <div class="form-group">
+          <label>Nombre del Servicio</label>
+          <input type="text" id="sName" class="form-control" required placeholder="Ej: Maquillaje Social & Fiesta">
+        </div>
+        <div class="form-group">
+          <label>Duración</label>
+          <input type="text" id="sDuration" class="form-control" required placeholder="Ej: 60 min">
+        </div>
+        <div class="form-group">
+          <label>Precio (COP)</label>
+          <input type="number" id="sPrice" class="form-control" required placeholder="90000">
+        </div>
+        <div class="form-group">
+          <label>Disponibilidad</label>
+          <input type="text" id="sAvailability" class="form-control" required placeholder="Ej: Lunes a Sábado">
+        </div>
+        <div class="form-group">
+          <label>Subir Imagen de Servicio (Cloudflare R2)</label>
+          <input type="file" id="sFileInput" class="form-control" accept="image/*" onchange="uploadFileToR2(this, 'sImage', 'sImagePreview')">
+          <input type="hidden" id="sImage">
+          <div id="sImagePreview" style="margin-top: 0.5rem;"></div>
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="sDesc" class="form-control" rows="2"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button type="button" onclick="closeServiceModal()" class="btn btn-sm btn-secondary" style="flex: 1;">Cancelar</button>
+          <button type="submit" class="btn btn-sm btn-primary" style="flex: 1;">Guardar Servicio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Payment Link Modal -->
+  <div id="paymentModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); z-index: 4000; align-items: center; justify-content: center;">
+    <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 480px;">
+      <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Crear Link de Cobro</h3>
+      <form onsubmit="createPaymentLink(event)">
+        <div class="form-group">
+          <label>Nombre del Cliente</label>
+          <input type="text" id="payCustomer" class="form-control" required placeholder="Ej: María Paula">
+        </div>
+        <div class="form-group">
+          <label>Concepto de Cobro</label>
+          <input type="text" id="payDesc" class="form-control" required placeholder="Ej: Servicio Maquillaje Novia + Labial">
+        </div>
+        <div class="form-group">
+          <label>Monto (COP)</label>
+          <input type="number" id="payAmount" class="form-control" required placeholder="180000">
+        </div>
+        <div class="form-group">
+          <label>Método Preferido</label>
+          <select id="payMethod" class="form-control">
+            <option value="Nequi / Bancolombia">Nequi / Bancolombia</option>
+            <option value="Transferencia Directa">Transferencia Directa</option>
+            <option value="Efectivo en Estudio">Efectivo en Estudio</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button type="button" onclick="closePaymentModal()" class="btn btn-sm btn-secondary" style="flex: 1;">Cancelar</button>
+          <button type="submit" class="btn btn-sm btn-primary" style="flex: 1;">Generar Cobro</button>
         </div>
       </form>
     </div>
@@ -257,43 +408,54 @@
     document.addEventListener('DOMContentLoaded', () => {
       window.authManager.onAuthStateChanged(user => {
         const statusEl = document.getElementById('adminUserStatus');
-        if (user) {
+        const deniedContainer = document.getElementById('accessDeniedContainer');
+        const dashboardContent = document.getElementById('adminDashboardContent');
+
+        if (user && user.role === 'admin') {
+          deniedContainer.style.display = 'none';
+          dashboardContent.style.display = 'block';
           statusEl.innerHTML = `
-            <span style="background: var(--rose-gold-dark); color: #FFF; padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.75rem;">
-              <i class="bi bi-person-check"></i> ${user.displayName} (${user.role})
+            <span style="background: var(--rose-gold-dark); color: #FFF; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem;">
+              <i class="bi bi-shield-check"></i> ${user.displayName} (Admin)
             </span>
           `;
+          loadAdminData();
         } else {
+          deniedContainer.style.display = 'block';
+          dashboardContent.style.display = 'none';
           statusEl.innerHTML = `
             <button onclick="window.authManager.signInWithGoogle()" class="btn btn-sm btn-outline-rose" style="color: #FFF; border-color: #FFF;">
-              <i class="bi bi-google"></i> Iniciar Sesión Admin
+              <i class="bi bi-google"></i> Ingresar Admin
             </button>
           `;
         }
       });
-
-      loadAdminData();
     });
 
     function switchTab(tab) {
       document.getElementById('tabProducts').style.display = tab === 'products' ? 'block' : 'none';
       document.getElementById('tabServices').style.display = tab === 'services' ? 'block' : 'none';
+      document.getElementById('tabBanners').style.display = tab === 'banners' ? 'block' : 'none';
+      document.getElementById('tabPayments').style.display = tab === 'payments' ? 'block' : 'none';
       document.getElementById('tabUsers').style.display = tab === 'users' ? 'block' : 'none';
       document.getElementById('tabOrders').style.display = tab === 'orders' ? 'block' : 'none';
 
-      document.getElementById('tabBtnProducts').classList.toggle('active', tab === 'products');
-      document.getElementById('tabBtnServices').classList.toggle('active', tab === 'services');
-      document.getElementById('tabBtnUsers').classList.toggle('active', tab === 'users');
-      document.getElementById('tabBtnOrders').classList.toggle('active', tab === 'orders');
+      const buttons = ['Products', 'Services', 'Banners', 'Payments', 'Users', 'Orders'];
+      buttons.forEach(b => {
+        const btn = document.getElementById(`tabBtn${b}`);
+        if (btn) btn.classList.toggle('active', tab.toLowerCase() === b.toLowerCase());
+      });
     }
 
     async function loadAdminData() {
       try {
-        const [prodRes, servRes, usersRes, ordRes, analyticsRes] = await Promise.all([
+        const [prodRes, servRes, usersRes, ordRes, bannerRes, payRes, analyticsRes] = await Promise.all([
           fetch('/api/account?action=getProducts').then(r => r.json()),
           fetch('/api/account?action=getServices').then(r => r.json()),
           fetch('/api/account?action=getUsers').then(r => r.json()),
           fetch('/api/account?action=getOrders').then(r => r.json()),
+          fetch('/api/account?action=getBanners').then(r => r.json()),
+          fetch('/api/account?action=getPaymentLinks').then(r => r.json()),
           fetch('/api/account?action=getAnalytics').then(r => r.json())
         ]);
 
@@ -310,33 +472,85 @@
         renderServicesTable(servRes.services || []);
         renderUsersTable(usersList);
         renderOrdersTable(ordRes.orders || []);
+        renderPaymentLinksTable(payRes.links || []);
+        populateBannerForm(bannerRes.banners || []);
       } catch (err) {
         console.error('Error loading admin data:', err);
       }
     }
 
+    // R2 / Base64 File Upload Handler
+    async function uploadFileToR2(fileInput, hiddenUrlId, previewContainerId) {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      showToast('Subiendo imagen a Cloudflare R2...', 'info');
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Data = e.target.result;
+        try {
+          const res = await fetch('/api/account?action=uploadImage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ base64Data, fileName: file.name })
+          });
+          const data = await res.json();
+          if (data.success && data.image_url) {
+            document.getElementById(hiddenUrlId).value = data.image_url;
+            document.getElementById(previewContainerId).innerHTML = `
+              <img src="${data.image_url}" style="height: 70px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-subtle);">
+            `;
+            showToast('Imagen cargada con éxito ✨');
+          }
+        } catch (err) {
+          showToast('Error al subir imagen', 'error');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Product Color Shades Helper
+    function addShadeInput(name = '', hex = '#C77B89') {
+      const container = document.getElementById('shadesContainer');
+      const div = document.createElement('div');
+      div.style.display = 'flex';
+      div.style.gap = '0.5rem';
+      div.style.alignItems = 'center';
+      div.innerHTML = `
+        <input type="text" placeholder="Nombre tono (ej. Nude Coral)" value="${name}" class="shade-name-input form-control" style="flex: 1;">
+        <input type="color" value="${hex}" class="shade-hex-input" style="width: 40px; height: 38px; border: none; border-radius: 4px; cursor: pointer;">
+        <button type="button" onclick="this.parentElement.remove()" style="color: #dc2743; background: none; border: none;"><i class="bi bi-x-circle"></i></button>
+      `;
+      container.appendChild(div);
+    }
+
     function renderProductsTable(products) {
       const tbody = document.getElementById('productsTableBody');
-      tbody.innerHTML = products.map(p => `
-        <tr>
-          <td><img src="${p.image_url}" alt="${p.name}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;"></td>
-          <td><strong>${p.name}</strong></td>
-          <td><span style="text-transform: uppercase; font-size: 0.75rem; background: var(--bg-alt); padding: 0.2rem 0.5rem; border-radius: 4px;">${p.category}</span></td>
-          <td>${formatCOP(p.price)}</td>
-          <td>${p.stock || 10}</td>
-          <td>
-            <button onclick="deleteProduct('${p.id}')" style="color: #dc2743; border: none; background: none; cursor: pointer;">
-              <i class="bi bi-trash"></i>
-            </button>
-          </td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = products.map(p => {
+        const shadesCount = p.shades ? p.shades.length : 0;
+        return `
+          <tr>
+            <td><img src="${p.image_url}" alt="${p.name}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;"></td>
+            <td><strong>${p.name}</strong></td>
+            <td><span style="text-transform: uppercase; font-size: 0.725rem; background: var(--bg-alt); padding: 0.2rem 0.5rem; border-radius: 4px;">${p.category}</span></td>
+            <td><span style="font-size: 0.8rem; color: var(--text-muted);">${shadesCount} tonos</span></td>
+            <td>${formatCOP(p.price)}</td>
+            <td>
+              <button onclick="deleteProduct('${p.id}')" style="color: #dc2743; border: none; background: none; cursor: pointer;">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function renderServicesTable(services) {
       const tbody = document.getElementById('servicesTableBody');
       tbody.innerHTML = services.map(s => `
         <tr>
+          <td><img src="${s.image_url}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;"></td>
           <td><strong>${s.name}</strong></td>
           <td>${s.duration}</td>
           <td>${formatCOP(s.price)}</td>
@@ -362,7 +576,7 @@
           <td>${u.email || '-'}</td>
           <td><code style="font-size: 0.75rem;">${u.uid || u.id}</code></td>
           <td>
-            <span style="padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; ${u.role === 'admin' ? 'background: #dcfce7; color: #15803d;' : 'background: #f1f5f9; color: #475569;'}">
+            <span style="padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.725rem; font-weight: 700; ${u.role === 'admin' ? 'background: #dcfce7; color: #15803d;' : 'background: #f1f5f9; color: #475569;'}">
               ${u.role || 'user'}
             </span>
           </td>
@@ -392,6 +606,66 @@
       `).join('');
     }
 
+    function renderPaymentLinksTable(links) {
+      const tbody = document.getElementById('paymentLinksTableBody');
+      if (links.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No hay links de cobro generados.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = links.map(l => `
+        <tr>
+          <td><code style="font-size: 0.75rem;">${l.id}</code></td>
+          <td><strong>${l.customerName}</strong></td>
+          <td>${l.description}</td>
+          <td><strong>${formatCOP(l.amount)}</strong></td>
+          <td>${l.paymentMethod}</td>
+          <td>
+            <button onclick="copyPaymentText('${l.customerName}', '${l.amount}', '${l.description}')" class="btn btn-sm btn-outline-rose">
+              <i class="bi bi-clipboard"></i> Copiar Cobro
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function populateBannerForm(banners) {
+      if (banners && banners.length > 0) {
+        const b = banners[0];
+        document.getElementById('bTitle').value = b.title || '';
+        document.getElementById('bSubtitle').value = b.subtitle || '';
+        document.getElementById('bDesc').value = b.desc || '';
+        document.getElementById('bImageUrl').value = b.image_url || '';
+        if (b.image_url) {
+          document.getElementById('bImagePreview').innerHTML = `<img src="${b.image_url}" style="height: 80px; border-radius: 6px; object-fit: cover;">`;
+        }
+      }
+    }
+
+    async function saveBannerConfig(e) {
+      e.preventDefault();
+      const bannerData = {
+        id: 'hero_banner_1',
+        title: document.getElementById('bTitle').value,
+        subtitle: document.getElementById('bSubtitle').value,
+        desc: document.getElementById('bDesc').value,
+        image_url: document.getElementById('bImageUrl').value
+      };
+
+      try {
+        const res = await fetch('/api/account?action=saveBanner', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bannerData)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Banner de portada actualizado ✨');
+        }
+      } catch (err) {
+        showToast('Error al actualizar banner', 'error');
+      }
+    }
+
     async function toggleUserRole(uid, newRole) {
       try {
         const res = await fetch('/api/account?action=setUserRole', {
@@ -411,20 +685,44 @@
 
     function openProductModal() {
       document.getElementById('productModal').style.display = 'flex';
+      document.getElementById('shadesContainer').innerHTML = '';
     }
-
     function closeProductModal() {
       document.getElementById('productModal').style.display = 'none';
     }
 
+    function openServiceModal() {
+      document.getElementById('serviceModal').style.display = 'flex';
+    }
+    function closeServiceModal() {
+      document.getElementById('serviceModal').style.display = 'none';
+    }
+
+    function openPaymentModal() {
+      document.getElementById('paymentModal').style.display = 'flex';
+    }
+    function closePaymentModal() {
+      document.getElementById('paymentModal').style.display = 'none';
+    }
+
     async function saveProduct(e) {
       e.preventDefault();
+      
+      const shadeInputs = document.querySelectorAll('#shadesContainer > div');
+      const shades = [];
+      shadeInputs.forEach(div => {
+        const name = div.querySelector('.shade-name-input').value;
+        const hex = div.querySelector('.shade-hex-input').value;
+        if (name.trim()) shades.push({ name, hex });
+      });
+
       const product = {
         name: document.getElementById('pName').value,
         category: document.getElementById('pCategory').value,
         price: Number(document.getElementById('pPrice').value),
-        image_url: document.getElementById('pImage').value,
+        image_url: document.getElementById('pImage').value || '/assets/foundation.jpg',
         description: document.getElementById('pDesc').value,
+        shades: shades,
         active: true
       };
 
@@ -443,6 +741,66 @@
       } catch (err) {
         showToast('Error al guardar el producto', 'error');
       }
+    }
+
+    async function saveService(e) {
+      e.preventDefault();
+      const service = {
+        name: document.getElementById('sName').value,
+        duration: document.getElementById('sDuration').value,
+        price: Number(document.getElementById('sPrice').value),
+        availability: document.getElementById('sAvailability').value,
+        image_url: document.getElementById('sImage').value || '/assets/service-makeup.jpg',
+        description: document.getElementById('sDesc').value
+      };
+
+      try {
+        const res = await fetch('/api/account?action=saveService', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(service)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Servicio guardado con éxito');
+          closeServiceModal();
+          loadAdminData();
+        }
+      } catch (err) {
+        showToast('Error al guardar servicio', 'error');
+      }
+    }
+
+    async function createPaymentLink(e) {
+      e.preventDefault();
+      const payload = {
+        customerName: document.getElementById('payCustomer').value,
+        description: document.getElementById('payDesc').value,
+        amount: document.getElementById('payAmount').value,
+        paymentMethod: document.getElementById('payMethod').value
+      };
+
+      try {
+        const res = await fetch('/api/account?action=createPaymentLink', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Link de cobro creado ✨');
+          closePaymentModal();
+          loadAdminData();
+        }
+      } catch (err) {
+        showToast('Error al generar cobro', 'error');
+      }
+    }
+
+    function copyPaymentText(name, amount, desc) {
+      const text = `💳 *LIZGLAM BEAUTY - SOLICITUD DE PAGO*\n👤 Cliente: ${name}\n📌 Concepto: ${desc}\n💰 Monto: ${formatCOP(amount)}\n\nContactar vía Instagram @lizglamstore para enviar comprobante de Nequi/Bancolombia 💕`;
+      navigator.clipboard.writeText(text);
+      showToast('¡Texto de cobro copiado al portapapeles!');
     }
 
     async function deleteProduct(id) {

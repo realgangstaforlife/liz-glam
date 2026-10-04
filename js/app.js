@@ -7,6 +7,8 @@ class LizGlamApp {
     this.products = [];
     this.services = [];
     this.combos = [];
+    this.banners = [];
+    this.selectedShades = {};
     this.currentCategory = 'all';
     this.init();
   }
@@ -15,11 +17,11 @@ class LizGlamApp {
     document.addEventListener('DOMContentLoaded', () => {
       this.bindEvents();
       this.loadCatalogData();
+      this.loadHeroBanner();
     });
   }
 
   bindEvents() {
-    // Mobile Nav Toggle
     const mobileToggle = document.getElementById('mobileToggle');
     const navLinks = document.getElementById('navLinks');
     if (mobileToggle && navLinks) {
@@ -28,7 +30,6 @@ class LizGlamApp {
       });
     }
 
-    // Cart Drawer Toggle
     const cartToggleBtns = document.querySelectorAll('.cart-toggle-btn');
     cartToggleBtns.forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -42,7 +43,6 @@ class LizGlamApp {
     if (closeCartBtn) closeCartBtn.addEventListener('click', () => window.cartManager.closeDrawer());
     if (cartOverlay) cartOverlay.addEventListener('click', () => window.cartManager.closeDrawer());
 
-    // Search Input
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
@@ -71,10 +71,31 @@ class LizGlamApp {
     }
   }
 
+  async loadHeroBanner() {
+    try {
+      const res = await fetch(`${API_URL}?action=getBanners`).then(r => r.json());
+      if (res.success && res.banners && res.banners.length > 0) {
+        const banner = res.banners[0];
+        const heroSection = document.querySelector('.hero');
+        const heroTitle = document.querySelector('.hero-title');
+        const heroDesc = document.querySelector('.hero-desc');
+        const heroTag = document.querySelector('.hero-tag');
+
+        if (banner.image_url && heroSection) {
+          heroSection.style.background = `linear-gradient(135deg, rgba(91,86,77,0.7) 0%, rgba(138,68,53,0.4) 100%), url('${banner.image_url}') center/cover no-repeat`;
+        }
+        if (banner.title && heroTitle) heroTitle.textContent = banner.title;
+        if (banner.desc && heroDesc) heroDesc.textContent = banner.desc;
+        if (banner.subtitle && heroTag) heroTag.textContent = banner.subtitle;
+      }
+    } catch (e) {
+      console.warn('Hero banner load notice:', e);
+    }
+  }
+
   setCategory(category) {
     this.currentCategory = category;
     
-    // Update category pills UI
     const pills = document.querySelectorAll('.filter-pill');
     pills.forEach(pill => {
       if (pill.dataset.category === category) {
@@ -96,10 +117,29 @@ class LizGlamApp {
 
     if (searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase();
-      filtered = filtered.filter(p => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
+      filtered = filtered.filter(p => p.name.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q)));
     }
 
     this.renderProducts(filtered);
+  }
+
+  selectShade(productId, shadeName) {
+    this.selectedShades[productId] = shadeName;
+    
+    // Update active UI dot
+    const dots = document.querySelectorAll(`.shade-dot-${productId}`);
+    dots.forEach(dot => {
+      if (dot.dataset.shade === shadeName) {
+        dot.style.border = '2px solid #5B564D';
+        dot.style.transform = 'scale(1.2)';
+      } else {
+        dot.style.border = '1px solid #E2DFDC';
+        dot.style.transform = 'scale(1)';
+      }
+    });
+
+    const shadeLabel = document.getElementById(`selectedShadeLabel_${productId}`);
+    if (shadeLabel) shadeLabel.textContent = `Tono: ${shadeName}`;
   }
 
   renderProducts(list = this.products) {
@@ -116,25 +156,51 @@ class LizGlamApp {
       return;
     }
 
-    grid.innerHTML = list.map(product => `
-      <div class="product-card">
-        <div class="product-img-wrapper">
-          <img src="${product.image_url}" alt="${product.name}" class="product-img" loading="lazy">
-          <span class="product-badge">${product.category}</span>
-        </div>
-        <div class="product-content">
-          <div class="product-category">LIZGLAM BEAUTY</div>
-          <h3 class="product-title">${product.name}</h3>
-          <p class="product-desc">${product.description}</p>
-          <div class="product-price-row">
-            <div class="product-price">${formatCOP(product.price)}</div>
-            <button onclick="window.lizGlamApp.addToCart('${product.id}', 'product')" class="btn btn-sm btn-primary">
-              <i class="bi bi-bag-plus"></i> Agregar
-            </button>
+    grid.innerHTML = list.map(product => {
+      const shades = product.shades || [];
+      const hasShades = shades.length > 0;
+      const currentShade = this.selectedShades[product.id] || (hasShades ? shades[0].name : '');
+
+      return `
+        <div class="product-card">
+          <div class="product-img-wrapper">
+            <img src="${product.image_url}" alt="${product.name}" class="product-img" loading="lazy">
+            <span class="product-badge">${product.category}</span>
+          </div>
+          <div class="product-content">
+            <div class="product-category">LIZGLAM BEAUTY</div>
+            <h3 class="product-title">${product.name}</h3>
+            <p class="product-desc">${product.description || ''}</p>
+
+            ${hasShades ? `
+              <div style="margin-bottom: 0.85rem;">
+                <div id="selectedShadeLabel_${product.id}" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.35rem; font-weight: 500;">
+                  Tono: ${currentShade}
+                </div>
+                <div style="display: flex; gap: 0.4rem; align-items: center;">
+                  ${shades.map(s => `
+                    <button type="button" 
+                      onclick="window.lizGlamApp.selectShade('${product.id}', '${s.name}')" 
+                      class="shade-dot-${product.id}"
+                      data-shade="${s.name}"
+                      title="${s.name}"
+                      style="width: 20px; height: 20px; border-radius: 50%; background-color: ${s.hex || '#C77B89'}; border: ${s.name === currentShade ? '2px solid #5B564D' : '1px solid #E2DFDC'}; cursor: pointer; transition: transform 0.2s;">
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="product-price-row">
+              <div class="product-price">${formatCOP(product.price)}</div>
+              <button onclick="window.lizGlamApp.addToCart('${product.id}', 'product')" class="btn btn-sm btn-primary">
+                <i class="bi bi-bag-plus"></i> Agregar
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   renderServices() {
@@ -154,7 +220,7 @@ class LizGlamApp {
           <div class="service-duration">
             <i class="bi bi-clock"></i> ${service.duration} &nbsp;|&nbsp; <i class="bi bi-calendar-check"></i> ${service.availability}
           </div>
-          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem;">${service.description}</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">${service.description}</p>
           <div style="display: flex; gap: 0.75rem;">
             <button onclick="window.lizGlamApp.addToCart('${service.id}', 'service')" class="btn btn-sm btn-outline-rose btn-full">
               <i class="bi bi-calendar-plus"></i> Añadir a Cita
@@ -175,10 +241,10 @@ class LizGlamApp {
       <div class="combo-card">
         <span class="combo-badge">Combo Especial ✨</span>
         <h3 class="font-serif" style="font-size: 1.35rem; margin-bottom: 0.5rem;">${combo.name}</h3>
-        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">${combo.description}</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">${combo.description}</p>
         <div style="display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1.25rem;">
           <span style="font-family: var(--font-serif); font-size: 1.5rem; font-weight: 700; color: var(--rose-gold-dark);">${formatCOP(combo.price)}</span>
-          ${combo.original_price ? `<span style="font-size: 0.9rem; text-decoration: line-through; color: var(--text-muted);">${formatCOP(combo.original_price)}</span>` : ''}
+          ${combo.original_price ? `<span style="font-size: 0.85rem; text-decoration: line-through; color: var(--text-muted);">${formatCOP(combo.original_price)}</span>` : ''}
         </div>
         <button onclick="window.lizGlamApp.addToCart('${combo.id}', 'combo')" class="btn btn-sm btn-primary btn-full">
           <i class="bi bi-gift"></i> Añadir Combo Glam
@@ -198,9 +264,12 @@ class LizGlamApp {
     }
 
     if (item) {
+      const selectedShade = this.selectedShades[id] || (item.shades && item.shades.length > 0 ? item.shades[0].name : null);
+      const displayName = selectedShade ? `${item.name} (${selectedShade})` : item.name;
+
       window.cartManager.addItem({
-        id: item.id,
-        name: item.name,
+        id: selectedShade ? `${item.id}_${selectedShade.replace(/\s+/g, '_')}` : item.id,
+        name: displayName,
         price: item.price,
         image_url: item.image_url,
         category: item.category || type
