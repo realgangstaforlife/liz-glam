@@ -164,7 +164,7 @@ class AuthManager {
 
     if (this.currentUser) {
       authBtnContainer.innerHTML = `
-        <a href="/cuenta.html" class="icon-btn" title="Mi Cuenta" style="display: flex; align-items: center; gap: 0.5rem;">
+        <a href="/cuenta" class="icon-btn" title="Mi Cuenta" style="display: flex; align-items: center; gap: 0.5rem;">
           <img src="${this.currentUser.photoURL}" alt="${this.currentUser.displayName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--rose-gold);">
         </a>
       `;

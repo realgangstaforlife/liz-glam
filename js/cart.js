@@ -147,7 +147,7 @@ class CartManager {
           <i class="bi bi-bag-heart" style="font-size: 3rem; color: var(--rose-gold); display: block; margin-bottom: 1rem;"></i>
           <p style="font-size: 1.1rem; font-weight: 500;">Tu carrito está vacío</p>
           <p style="font-size: 0.85rem; margin-top: 0.5rem;">Descubre nuestros maquillajes y servicios de belleza.</p>
-          <a href="/productos.html" onclick="window.cartManager.closeDrawer()" class="btn btn-sm btn-primary" style="margin-top: 1.5rem;">Explorar Tienda</a>
+          <a href="/productos" onclick="window.cartManager.closeDrawer()" class="btn btn-sm btn-primary" style="margin-top: 1.5rem;">Explorar Tienda</a>
         </div>
       `;
       if (totalEl) totalEl.textContent = formatCOP(0);

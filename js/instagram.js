@@ -9,38 +9,55 @@ class InstagramOrderManager {
   }
 
   getUserName() {
-    if (window.authManager && window.authManager.currentUser) {
+    if (window.authManager && window.authManager.currentUser && window.authManager.currentUser.displayName) {
       return window.authManager.currentUser.displayName;
     }
     const savedName = localStorage.getItem('lizglam_guest_name');
-    return savedName || null;
+    return savedName || '';
   }
 
   async promptCustomerNameIfNeeded() {
-    let name = this.getUserName();
-    if (name) return name;
+    const existingName = this.getUserName();
 
     return new Promise((resolve) => {
+      // Remove any existing name modal
+      const existing = document.getElementById('guestNameModal');
+      if (existing) existing.remove();
+
       const modal = document.createElement('div');
+      modal.id = 'guestNameModal';
       modal.style.cssText = `
-        position: fixed; inset: 0; background: rgba(28,23,24,0.7); backdrop-filter: blur(6px);
-        z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1rem;
+        position: fixed !important; inset: 0 !important;
+        background: rgba(28,23,24,0.75) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        z-index: 999999 !important;
+        display: flex !important; align-items: center !important; justify-content: center !important;
+        padding: 1rem !important;
       `;
+
       modal.innerHTML = `
-        <div style="background: #FFF; border-radius: 12px; padding: 2rem; max-width: 420px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
-          <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 0.5rem; text-align: center;">¿Cómo te llamas? 💕</h3>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; text-align: center;">
-            Ingresa tu nombre para personalizar tu pedido antes de ir a Instagram:
+        <div style="background: #FFF; border-radius: 14px; padding: 2.25rem 2rem; max-width: 440px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.25); text-align: center; border: 1px solid var(--border-subtle); animation: modalFadeIn 0.25s ease;">
+          <i class="bi bi-person-heart" style="font-size: 3rem; color: var(--rose-gold); display: block; margin-bottom: 0.75rem;"></i>
+          <h3 class="font-serif" style="font-size: 1.6rem; margin-bottom: 0.5rem; color: var(--text-main);">¿A nombre de quién es el pedido? 💕</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5;">
+            Ingresa tu nombre para adjuntarlo a tu pedido antes de enviarlo por Instagram:
           </p>
-          <input type="text" id="guestNameInput" class="form-control" placeholder="Ej: María Paula" style="margin-bottom: 1.25rem;">
-          <button id="submitGuestNameBtn" class="btn btn-primary btn-full">Continuar a Instagram</button>
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <input type="text" id="guestNameInput" class="form-control" placeholder="Ej: María Paula" value="${existingName}" style="text-align: center; font-size: 1.05rem; padding: 0.85rem; border-color: var(--rose-gold);">
+          </div>
+          <button id="submitGuestNameBtn" class="btn btn-primary btn-full" style="font-size: 1rem; padding: 0.85rem;">
+            <i class="bi bi-instagram"></i> Confirmar y Continuar
+          </button>
         </div>
       `;
+
       document.body.appendChild(modal);
 
       const input = modal.querySelector('#guestNameInput');
       const btn = modal.querySelector('#submitGuestNameBtn');
       input.focus();
+      if (existingName) input.select();
 
       const finish = () => {
         const value = input.value.trim() || 'Cliente';

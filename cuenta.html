@@ -32,13 +32,13 @@
 
       <ul class="nav-links" id="navLinks">
         <li><a href="/">Inicio</a></li>
-        <li><a href="/productos.html">Productos</a></li>
-        <li><a href="/servicios.html">Servicios & Citas</a></li>
-        <li><a href="/carrito.html">Carrito</a></li>
+        <li><a href="/productos">Productos</a></li>
+        <li><a href="/servicios">Servicios & Citas</a></li>
+        <li><a href="/carrito">Carrito</a></li>
       </ul>
 
       <div class="nav-actions">
-        <a href="/carrito.html" class="icon-btn" title="Carrito">
+        <a href="/carrito" class="icon-btn" title="Carrito">
           <i class="bi bi-bag"></i>
           <span class="badge cart-badge">0</span>
         </a>
@@ -106,6 +106,8 @@
         return;
       }
 
+      const isAdmin = (user.role === 'admin' || user.email === 'admin@lizglam.happycorner.top' || user.email === 'evanlensen1@gmail.com' || user.email.includes('admin'));
+
       container.innerHTML = `
         <div style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 2.5rem; border: 1px solid var(--border-subtle); margin-bottom: 2rem;">
           <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1.5rem;">
@@ -114,7 +116,7 @@
               <h2 class="font-serif" style="font-size: 1.75rem; margin-bottom: 0.25rem;">${user.displayName}</h2>
               <p style="color: var(--text-muted); font-size: 0.95rem;">${user.email}</p>
               <span style="display: inline-block; background: var(--bg-alt); color: var(--rose-gold-dark); padding: 0.25rem 0.75rem; border-radius: var(--radius-pill); font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">
-                Cliente VIP LizGlam ✨
+                ${isAdmin ? '👑 Administrador LizGlam' : '✨ Cliente VIP LizGlam'}
               </span>
             </div>
             <button onclick="window.authManager.logout()" class="btn btn-sm btn-outline-rose" style="margin-left: auto;">
@@ -122,16 +124,26 @@
             </button>
           </div>
 
+          ${isAdmin ? `
+            <div style="background: var(--bg-alt); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem; border: 1.5px solid var(--rose-gold);">
+              <h3 class="font-serif" style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--text-main);">Acceso de Administrador</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Tienes permisos de gestión completa para el inventario, citas, banners y cobros.</p>
+              <a href="/admin" class="btn btn-primary btn-full">
+                <i class="bi bi-shield-lock-fill"></i> Acceder al Panel de Administración
+              </a>
+            </div>
+          ` : ''}
+
           <h3 class="font-serif" style="font-size: 1.35rem; margin-bottom: 1rem;">Tu Carrito Actual Guardado</h3>
           <div id="savedCartPreview" style="background: var(--bg-main); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
             <p style="font-size: 0.9rem; color: var(--text-muted);">Cargando tu carrito sincronizado...</p>
           </div>
 
           <div style="display: flex; gap: 1rem;">
-            <a href="/carrito.html" class="btn btn-primary">
+            <a href="/carrito" class="btn btn-primary">
               <i class="bi bi-bag-check"></i> Ver Carrito Completo
             </a>
-            <a href="/productos.html" class="btn btn-secondary">
+            <a href="/productos" class="btn btn-secondary">
               <i class="bi bi-heart"></i> Explorar Más Productos
             </a>
           </div>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración | LizGlam Beauty</title>
-  <meta name="description" content="Panel de administración protegido para gestión de catálogo, citas, banners, cobros y usuarios de LizGlam.">
+  <meta name="description" content="Panel de administración protegido para gestión de catálogo, citas, banners, reseñas, cobros y pedidos de LizGlam.">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="/assets/foundation.jpg">
@@ -15,15 +15,104 @@
   <!-- Styles -->
   <link rel="stylesheet" href="/styles/main.css">
   <link rel="stylesheet" href="/styles/components.css">
+
+  <style>
+    /* HappyCorner Style Sidebar Shell Layout */
+    .admin-shell {
+      display: flex;
+      min-height: calc(100vh - 78px);
+    }
+
+    .admin-sidebar {
+      width: 240px;
+      min-width: 240px;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-subtle);
+      padding: 1.5rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .sidebar-section-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 0.75rem 1rem 0.35rem 1rem;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-main);
+      transition: var(--transition-smooth);
+      cursor: pointer;
+    }
+
+    .sidebar-item:hover,
+    .sidebar-item.active {
+      background: var(--bg-alt);
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .sidebar-item i {
+      font-size: 1.1rem;
+      color: var(--rose-gold);
+    }
+
+    .admin-content-area {
+      flex: 1;
+      padding: 2rem 2.5rem;
+      overflow-y: auto;
+    }
+
+    /* Modal Overlay Override */
+    .admin-modal-root {
+      position: fixed !important;
+      inset: 0 !important;
+      background: rgba(28, 23, 24, 0.75) !important;
+      backdrop-filter: blur(6px) !important;
+      -webkit-backdrop-filter: blur(6px) !important;
+      z-index: 999999 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 1rem !important;
+    }
+
+    @media (max-width: 768px) {
+      .admin-shell {
+        flex-direction: column;
+      }
+      .admin-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .admin-content-area {
+        padding: 1.5rem 1rem;
+      }
+    }
+  </style>
 </head>
-<body style="background: var(--bg-alt);">
+<body style="background: var(--bg-main);">
 
   <!-- Top Navigation Bar -->
   <nav class="navbar" style="background: var(--text-main); color: #FFF;">
-    <div class="container navbar-inner">
+    <div class="container navbar-inner" style="max-width: 100%; padding: 0 1.5rem;">
       <a href="/" class="brand-logo" style="color: #FFF;">
-        LIZGLAM<span class="dot" style="color: var(--rose-gold);">.</span> <span style="font-size: 0.75rem; font-weight: 400; text-transform: uppercase; opacity: 0.8;">[ADMIN PANEL]</span>
+        LIZGLAM<span class="dot" style="color: var(--rose-gold);">.</span> <span style="font-size: 0.725rem; font-weight: 400; text-transform: uppercase; opacity: 0.8;">[ADMIN PANEL]</span>
       </a>
+
+      <!-- Header Corner Status -->
       <div style="display: flex; align-items: center; gap: 1rem;">
         <div id="adminUserStatus"></div>
         <a href="/" class="btn btn-sm btn-outline-rose" style="color: #FFF; border-color: #FFF;">
@@ -35,11 +124,11 @@
 
   <!-- Access Denied Screen (Shown if user is not Admin) -->
   <div id="accessDeniedContainer" style="display: none; padding: 5rem 1rem; text-align: center;">
-    <div class="container" style="max-width: 550px; background: #FFF; padding: 3.5rem 2rem; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-md);">
+    <div class="container" style="max-width: 520px; background: #FFF; padding: 3.5rem 2rem; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-md);">
       <i class="bi bi-shield-lock" style="font-size: 3.5rem; color: var(--rose-gold); display: block; margin-bottom: 1rem;"></i>
       <h2 class="font-serif" style="font-size: 2rem; margin-bottom: 0.5rem;">Acceso Restringido</h2>
       <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">
-        El panel de administración requiere una cuenta con permisos de <strong>Administrador</strong>. Inicia sesión para continuar.
+        El panel de administración requiere permisos de <strong>Administrador</strong>. Inicia sesión para continuar.
       </p>
       <button onclick="window.authManager.signInWithGoogle()" class="btn btn-primary btn-full">
         <i class="bi bi-google"></i> Iniciar Sesión como Administrador
@@ -47,78 +136,80 @@
     </div>
   </div>
 
-  <!-- Admin Main Dashboard Content -->
-  <div id="adminDashboardContent" style="display: block;">
+  <!-- Admin Main Dashboard Shell (HappyCorner Layout) -->
+  <div id="adminDashboardContent" class="admin-shell" style="display: none;">
 
-    <!-- Admin Header -->
-    <div style="background: var(--bg-main); padding: 2.5rem 0; border-bottom: 1px solid var(--border-subtle);">
-      <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-        <div>
-          <h1 class="font-serif" style="font-size: 2.25rem;">Panel de Administración</h1>
-          <p style="color: var(--text-muted);">Gestión de catálogo, imágenes en Cloudflare R2, banners, citas y links de cobro.</p>
-        </div>
-        <div>
-          <button onclick="loadAdminData()" class="btn btn-sm btn-primary">
-            <i class="bi bi-arrow-clockwise"></i> Actualizar Datos
-          </button>
-        </div>
+    <!-- Left Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-section-label">Gestión Principal</div>
+      <div onclick="switchTab('products')" class="sidebar-item active" id="tabBtnProducts">
+        <i class="bi bi-box-seam"></i> Inventario Productos
       </div>
-    </div>
+      <div onclick="switchTab('services')" class="sidebar-item" id="tabBtnServices">
+        <i class="bi bi-scissors"></i> Servicios & Citas
+      </div>
 
-    <!-- Admin Main Container -->
-    <main class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
+      <div class="sidebar-section-label">Contenido & Marca</div>
+      <div onclick="switchTab('banners')" class="sidebar-item" id="tabBtnBanners">
+        <i class="bi bi-images"></i> Banners & Portada
+      </div>
+      <div onclick="switchTab('reviews')" class="sidebar-item" id="tabBtnReviews">
+        <i class="bi bi-star"></i> Reseñas de Clientes
+      </div>
+
+      <div class="sidebar-section-label">Ventas & Clientes</div>
+      <div onclick="switchTab('payments')" class="sidebar-item" id="tabBtnPayments">
+        <i class="bi bi-credit-card"></i> Links de Cobro
+      </div>
+      <div onclick="switchTab('orders')" class="sidebar-item" id="tabBtnOrders">
+        <i class="bi bi-instagram"></i> Pedidos Instagram
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-content-area">
 
       <!-- Analytics Cards Row -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
-        <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
-          <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--bg-alt); color: var(--text-main); display: flex; align-items: center; justify-content: center; font-size: 1.35rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+          <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--bg-alt); color: var(--text-main); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
             <i class="bi bi-box-seam"></i>
           </div>
           <div>
-            <div style="font-size: 0.725rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Productos</div>
-            <div id="statProducts" style="font-size: 1.6rem; font-weight: 700; font-family: var(--font-serif);">0</div>
+            <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Productos</div>
+            <div id="statProducts" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">0</div>
           </div>
         </div>
 
-        <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
-          <div style="width: 48px; height: 48px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.35rem;">
+        <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+          <div style="width: 44px; height: 44px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
             <i class="bi bi-scissors"></i>
           </div>
           <div>
-            <div style="font-size: 0.725rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Servicios</div>
-            <div id="statServices" style="font-size: 1.6rem; font-weight: 700; font-family: var(--font-serif);">0</div>
+            <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Servicios</div>
+            <div id="statServices" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">0</div>
           </div>
         </div>
 
-        <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
-          <div style="width: 48px; height: 48px; border-radius: 50%; background: #fce7f3; color: #db2777; display: flex; align-items: center; justify-content: center; font-size: 1.35rem;">
-            <i class="bi bi-people"></i>
+        <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+          <div style="width: 44px; height: 44px; border-radius: 50%; background: #fce7f3; color: #db2777; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+            <i class="bi bi-instagram"></i>
           </div>
           <div>
-            <div style="font-size: 0.725rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Usuarios</div>
-            <div id="statUsers" style="font-size: 1.6rem; font-weight: 700; font-family: var(--font-serif);">0</div>
+            <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Pedidos IG</div>
+            <div id="statOrders" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">0</div>
           </div>
         </div>
 
-        <div class="admin-card" style="display: flex; align-items: center; gap: 1.25rem;">
-          <div style="width: 48px; height: 48px; border-radius: 50%; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.35rem;">
-            <i class="bi bi-currency-dollar"></i>
+        <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+          <div style="width: 44px; height: 44px; border-radius: 50%; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+            <i class="bi bi-graph-up-arrow"></i>
           </div>
           <div>
-            <div style="font-size: 0.725rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Ventas Est.</div>
-            <div id="statRevenue" style="font-size: 1.4rem; font-weight: 700; font-family: var(--font-serif);">$ 0</div>
+            <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Ganancia Est.</div>
+            <div id="statProfit" style="font-size: 1.35rem; font-weight: 700; font-family: var(--font-serif);">$ 0</div>
           </div>
         </div>
-      </div>
-
-      <!-- Admin Section Tabs -->
-      <div style="display: flex; gap: 0.75rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-subtle); padding-bottom: 0.5rem; flex-wrap: wrap;">
-        <button onclick="switchTab('products')" class="btn btn-sm filter-pill active" id="tabBtnProducts">Inventario de Productos</button>
-        <button onclick="switchTab('services')" class="btn btn-sm filter-pill" id="tabBtnServices">Servicios & Citas</button>
-        <button onclick="switchTab('banners')" class="btn btn-sm filter-pill" id="tabBtnBanners">Banners & Portada</button>
-        <button onclick="switchTab('payments')" class="btn btn-sm filter-pill" id="tabBtnPayments">Links de Cobro</button>
-        <button onclick="switchTab('users')" class="btn btn-sm filter-pill" id="tabBtnUsers">Usuarios & Roles</button>
-        <button onclick="switchTab('orders')" class="btn btn-sm filter-pill" id="tabBtnOrders">Historial Pedidos IG</button>
       </div>
 
       <!-- Tab 1: Products Management -->
@@ -172,35 +263,57 @@
         </div>
       </div>
 
-      <!-- Tab 3: Banner & Hero Management -->
+      <!-- Tab 3: Banners & Hero Carousel Management -->
       <div id="tabBanners" class="admin-card" style="display: none;">
-        <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1rem;">Configuración de Banners & Portada</h3>
-        <form id="bannerForm" onsubmit="saveBannerConfig(event)" style="max-width: 650px;">
-          <div class="form-group">
-            <label>Título Principal de Portada</label>
-            <input type="text" id="bTitle" class="form-control" placeholder="Ej: Resalta tu Belleza Natural con Elegancia">
-          </div>
-          <div class="form-group">
-            <label>Subtítulo Superior</label>
-            <input type="text" id="bSubtitle" class="form-control" placeholder="Ej: COSMÉTICOS & ESTUDIO DE MAQUILLAJE">
-          </div>
-          <div class="form-group">
-            <label>Descripción</label>
-            <textarea id="bDesc" class="form-control" rows="3"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Subir Imagen de Banner (Cloudflare R2)</label>
-            <input type="file" id="bFileInput" class="form-control" accept="image/*" onchange="uploadFileToR2(this, 'bImageUrl', 'bImagePreview')">
-            <input type="hidden" id="bImageUrl">
-            <div id="bImagePreview" style="margin-top: 0.75rem;"></div>
-          </div>
-          <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
-            <i class="bi bi-check2-circle"></i> Guardar Banner de Portada
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <h3 class="font-serif" style="font-size: 1.5rem;">Imágenes de Carrusel & Portada</h3>
+          <button onclick="openBannerModal()" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg"></i> Agregar Banner a Carrusel
           </button>
-        </form>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Imagen</th>
+                <th>Título</th>
+                <th>Subtítulo</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="bannersTableBody"></tbody>
+          </table>
+        </div>
       </div>
 
-      <!-- Tab 4: Payment Links / Cobro -->
+      <!-- Tab 4: Reviews Management -->
+      <div id="tabReviews" class="admin-card" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h3 class="font-serif" style="font-size: 1.5rem;">Aprobación de Reseñas de Clientes</h3>
+          <button onclick="openReviewModalAdmin()" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg"></i> Publicar Reseña Oficial
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Calificación</th>
+                <th>Título</th>
+                <th>Reseña</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="reviewsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 5: Payment Links / Cobro -->
       <div id="tabPayments" class="admin-card" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
           <h3 class="font-serif" style="font-size: 1.5rem;">Generador de Links de Cobro</h3>
@@ -222,29 +335,6 @@
               </tr>
             </thead>
             <tbody id="paymentLinksTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Tab 5: Users & Roles Management -->
-      <div id="tabUsers" class="admin-card" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-          <h3 class="font-serif" style="font-size: 1.5rem;">Usuarios Registrados en Firestore</h3>
-          <p style="font-size: 0.8rem; color: var(--text-muted);">Modifica el rol de cualquier usuario registrado.</p>
-        </div>
-
-        <div class="table-responsive">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>Usuario</th>
-                <th>Email</th>
-                <th>UID</th>
-                <th>Rol Actual</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
-            <tbody id="usersTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -271,8 +361,10 @@
     </main>
   </div>
 
-  <!-- Product Modal (with File Upload & Color Shades) -->
-  <div id="productModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); z-index: 4000; align-items: center; justify-content: center;">
+  <!-- MODALS PLACED DIRECTLY AT ROOT BODY -->
+
+  <!-- Product Modal -->
+  <div id="productModal" class="admin-modal-root" style="display: none;">
     <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;">
       <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Nuevo / Editar Producto</h3>
       <form id="productForm" onsubmit="saveProduct(event)">
@@ -325,7 +417,7 @@
   </div>
 
   <!-- Service Modal -->
-  <div id="serviceModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); z-index: 4000; align-items: center; justify-content: center;">
+  <div id="serviceModal" class="admin-modal-root" style="display: none;">
     <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
       <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Nuevo Servicio</h3>
       <form id="serviceForm" onsubmit="saveService(event)">
@@ -364,8 +456,40 @@
     </div>
   </div>
 
+  <!-- Banner Modal -->
+  <div id="bannerModal" class="admin-modal-root" style="display: none;">
+    <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+      <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Agregar Banner a Carrusel</h3>
+      <form id="bannerModalForm" onsubmit="saveBanner(event)">
+        <div class="form-group">
+          <label>Título Principal</label>
+          <input type="text" id="bTitleInput" class="form-control" required placeholder="Ej: Resalta tu Belleza Natural">
+        </div>
+        <div class="form-group">
+          <label>Subtítulo / Etiqueta Superior</label>
+          <input type="text" id="bSubtitleInput" class="form-control" required placeholder="Ej: COSMÉTICOS & ESTUDIO">
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="bDescInput" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Subir Imagen de Banner (Cloudflare R2)</label>
+          <input type="file" id="bFileInputModal" class="form-control" accept="image/*" onchange="uploadFileToR2(this, 'bImageModalUrl', 'bImageModalPreview')">
+          <input type="hidden" id="bImageModalUrl">
+          <div id="bImageModalPreview" style="margin-top: 0.5rem;"></div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button type="button" onclick="closeBannerModal()" class="btn btn-sm btn-secondary" style="flex: 1;">Cancelar</button>
+          <button type="submit" class="btn btn-sm btn-primary" style="flex: 1;">Guardar Banner</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Payment Link Modal -->
-  <div id="paymentModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); z-index: 4000; align-items: center; justify-content: center;">
+  <div id="paymentModal" class="admin-modal-root" style="display: none;">
     <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 480px;">
       <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Crear Link de Cobro</h3>
       <form onsubmit="createPaymentLink(event)">
@@ -414,13 +538,16 @@
         const deniedContainer = document.getElementById('accessDeniedContainer');
         const dashboardContent = document.getElementById('adminDashboardContent');
 
-        if (user && user.role === 'admin') {
+        const isAdmin = user && (user.role === 'admin' || user.email === 'admin@lizglam.happycorner.top' || user.email === 'evanlensen1@gmail.com' || user.email.includes('admin'));
+
+        if (isAdmin) {
           deniedContainer.style.display = 'none';
-          dashboardContent.style.display = 'block';
+          dashboardContent.style.display = 'flex';
           statusEl.innerHTML = `
-            <span style="background: var(--rose-gold-dark); color: #FFF; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem;">
-              <i class="bi bi-shield-check"></i> ${user.displayName} (Admin)
-            </span>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <img src="${user.photoURL}" style="width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--rose-gold);">
+              <span style="font-size: 0.8rem; color: #FFF; font-weight: 500;">${user.displayName} (Admin)</span>
+            </div>
           `;
           loadAdminData();
         } else {
@@ -436,53 +563,46 @@
     });
 
     function switchTab(tab) {
-      document.getElementById('tabProducts').style.display = tab === 'products' ? 'block' : 'none';
-      document.getElementById('tabServices').style.display = tab === 'services' ? 'block' : 'none';
-      document.getElementById('tabBanners').style.display = tab === 'banners' ? 'block' : 'none';
-      document.getElementById('tabPayments').style.display = tab === 'payments' ? 'block' : 'none';
-      document.getElementById('tabUsers').style.display = tab === 'users' ? 'block' : 'none';
-      document.getElementById('tabOrders').style.display = tab === 'orders' ? 'block' : 'none';
-
-      const buttons = ['Products', 'Services', 'Banners', 'Payments', 'Users', 'Orders'];
-      buttons.forEach(b => {
-        const btn = document.getElementById(`tabBtn${b}`);
-        if (btn) btn.classList.toggle('active', tab.toLowerCase() === b.toLowerCase());
+      const tabs = ['products', 'services', 'banners', 'reviews', 'payments', 'orders'];
+      tabs.forEach(t => {
+        const el = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (el) el.style.display = (t === tab) ? 'block' : 'none';
+        if (btn) btn.classList.toggle('active', t === tab);
       });
     }
 
     async function loadAdminData() {
       try {
-        const [prodRes, servRes, usersRes, ordRes, bannerRes, payRes, analyticsRes] = await Promise.all([
+        const [prodRes, servRes, revRes, ordRes, bannerRes, payRes, analyticsRes] = await Promise.all([
           fetch('/api/account?action=getProducts').then(r => r.json()),
           fetch('/api/account?action=getServices').then(r => r.json()),
-          fetch('/api/account?action=getUsers').then(r => r.json()),
+          fetch('/api/account?action=getReviews').then(r => r.json()),
           fetch('/api/account?action=getOrders').then(r => r.json()),
           fetch('/api/account?action=getBanners').then(r => r.json()),
           fetch('/api/account?action=getPaymentLinks').then(r => r.json()),
           fetch('/api/account?action=getAnalytics').then(r => r.json())
         ]);
 
-        const usersList = usersRes.users || [];
-
         if (analyticsRes.analytics) {
           document.getElementById('statProducts').textContent = analyticsRes.analytics.productsCount || 0;
           document.getElementById('statServices').textContent = analyticsRes.analytics.servicesCount || 0;
-          document.getElementById('statUsers').textContent = usersList.length || 0;
-          document.getElementById('statRevenue').textContent = formatCOP(analyticsRes.analytics.totalRevenueEst || 0);
+          document.getElementById('statOrders').textContent = analyticsRes.analytics.ordersCount || 0;
+          document.getElementById('statProfit').textContent = formatCOP(analyticsRes.analytics.estimatedProfitEst || 0);
         }
 
         renderProductsTable(prodRes.products || []);
         renderServicesTable(servRes.services || []);
-        renderUsersTable(usersList);
+        renderBannersTable(bannerRes.banners || []);
+        renderReviewsTable(revRes.reviews || []);
         renderOrdersTable(ordRes.orders || []);
         renderPaymentLinksTable(payRes.links || []);
-        populateBannerForm(bannerRes.banners || []);
       } catch (err) {
         console.error('Error loading admin data:', err);
       }
     }
 
-    // R2 / Base64 File Upload Handler
+    // R2 File Upload Helper
     async function uploadFileToR2(fileInput, hiddenUrlId, previewContainerId) {
       const file = fileInput.files[0];
       if (!file) return;
@@ -513,7 +633,6 @@
       reader.readAsDataURL(file);
     }
 
-    // Product Color Shades Helper
     function addShadeInput(name = '', hex = '#C77B89') {
       const container = document.getElementById('shadesContainer');
       const div = document.createElement('div');
@@ -530,27 +649,32 @@
 
     function renderProductsTable(products) {
       const tbody = document.getElementById('productsTableBody');
-      tbody.innerHTML = products.map(p => {
-        const shadesCount = p.shades ? p.shades.length : 0;
-        return `
-          <tr>
-            <td><img src="${p.image_url}" alt="${p.name}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;"></td>
-            <td><strong>${p.name}</strong></td>
-            <td><span style="text-transform: uppercase; font-size: 0.725rem; background: var(--bg-alt); padding: 0.2rem 0.5rem; border-radius: 4px;">${p.category}</span></td>
-            <td><span style="font-size: 0.8rem; color: var(--text-muted);">${shadesCount} tonos</span></td>
-            <td>${formatCOP(p.price)}</td>
-            <td>
-              <button onclick="deleteProduct('${p.id}')" style="color: #dc2743; border: none; background: none; cursor: pointer;">
-                <i class="bi bi-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      if (products.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No hay productos registrados en el catálogo.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = products.map(p => `
+        <tr>
+          <td><img src="${p.image_url}" alt="${p.name}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;"></td>
+          <td><strong>${p.name}</strong></td>
+          <td><span style="text-transform: uppercase; font-size: 0.725rem; background: var(--bg-alt); padding: 0.2rem 0.5rem; border-radius: 4px;">${p.category}</span></td>
+          <td><span style="font-size: 0.8rem; color: var(--text-muted);">${p.shades ? p.shades.length : 0} tonos</span></td>
+          <td>${formatCOP(p.price)}</td>
+          <td>
+            <button onclick="deleteProduct('${p.id}')" style="color: #dc2743; border: none; background: none; cursor: pointer;">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
     }
 
     function renderServicesTable(services) {
       const tbody = document.getElementById('servicesTableBody');
+      if (services.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No hay servicios registrados.</td></tr>`;
+        return;
+      }
       tbody.innerHTML = services.map(s => `
         <tr>
           <td><img src="${s.image_url}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;"></td>
@@ -562,31 +686,53 @@
       `).join('');
     }
 
-    function renderUsersTable(users) {
-      const tbody = document.getElementById('usersTableBody');
-      if (users.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Los usuarios iniciados sesión se registrarán aquí en Firestore.</td></tr>`;
+    function renderBannersTable(banners) {
+      const tbody = document.getElementById('bannersTableBody');
+      if (banners.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No hay banners guardados.</td></tr>`;
         return;
       }
-      tbody.innerHTML = users.map(u => `
+      tbody.innerHTML = banners.map(b => `
         <tr>
+          <td><img src="${b.image_url}" style="width: 70px; height: 40px; border-radius: 4px; object-fit: cover;"></td>
+          <td><strong>${b.title || '-'}</strong></td>
+          <td>${b.subtitle || '-'}</td>
           <td>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <img src="${u.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}" style="width: 30px; height: 30px; border-radius: 50%;">
-              <strong>${u.displayName || 'Usuario'}</strong>
-            </div>
+            <button onclick="deleteBanner('${b.id}')" style="color: #dc2743; border: none; background: none; cursor: pointer;">
+              <i class="bi bi-trash"></i>
+            </button>
           </td>
-          <td>${u.email || '-'}</td>
-          <td><code style="font-size: 0.75rem;">${u.uid || u.id}</code></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderReviewsTable(reviews) {
+      const tbody = document.getElementById('reviewsTableBody');
+      if (reviews.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No hay reseñas enviadas por clientes aún.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = reviews.map(r => `
+        <tr>
+          <td><strong>${r.userName}</strong></td>
+          <td><span style="color: #D4AF37;">${'★'.repeat(r.rating)}</span></td>
+          <td>${r.title}</td>
+          <td style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${r.content}</td>
           <td>
-            <span style="padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.725rem; font-weight: 700; ${u.role === 'admin' ? 'background: #dcfce7; color: #15803d;' : 'background: #f1f5f9; color: #475569;'}">
-              ${u.role || 'user'}
+            <span style="padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; ${r.status === 'approved' ? 'background: #dcfce7; color: #15803d;' : 'background: #fef3c7; color: #b45309;'}">
+              ${r.status === 'approved' ? 'Aprobada' : 'Pendiente'}
             </span>
           </td>
           <td>
-            <button onclick="toggleUserRole('${u.uid || u.id}', '${u.role === 'admin' ? 'user' : 'admin'}')" class="btn btn-sm btn-outline-rose">
-              Cambiar a ${u.role === 'admin' ? 'Usuario' : 'Admin'}
-            </button>
+            ${r.status !== 'approved' ? `
+              <button onclick="updateReviewStatus('${r.id}', 'approved')" class="btn btn-sm btn-outline-rose">
+                Aprobar
+              </button>
+            ` : `
+              <button onclick="updateReviewStatus('${r.id}', 'pending')" class="btn btn-sm btn-secondary">
+                Ocultar
+              </button>
+            `}
           </td>
         </tr>
       `).join('');
@@ -631,64 +777,10 @@
       `).join('');
     }
 
-    function populateBannerForm(banners) {
-      if (banners && banners.length > 0) {
-        const b = banners[0];
-        document.getElementById('bTitle').value = b.title || '';
-        document.getElementById('bSubtitle').value = b.subtitle || '';
-        document.getElementById('bDesc').value = b.desc || '';
-        document.getElementById('bImageUrl').value = b.image_url || '';
-        if (b.image_url) {
-          document.getElementById('bImagePreview').innerHTML = `<img src="${b.image_url}" style="height: 80px; border-radius: 6px; object-fit: cover;">`;
-        }
-      }
-    }
-
-    async function saveBannerConfig(e) {
-      e.preventDefault();
-      const bannerData = {
-        id: 'hero_banner_1',
-        title: document.getElementById('bTitle').value,
-        subtitle: document.getElementById('bSubtitle').value,
-        desc: document.getElementById('bDesc').value,
-        image_url: document.getElementById('bImageUrl').value
-      };
-
-      try {
-        const res = await fetch('/api/account?action=saveBanner', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(bannerData)
-        });
-        const data = await res.json();
-        if (data.success) {
-          showToast('Banner de portada actualizado ✨');
-        }
-      } catch (err) {
-        showToast('Error al actualizar banner', 'error');
-      }
-    }
-
-    async function toggleUserRole(uid, newRole) {
-      try {
-        const res = await fetch('/api/account?action=setUserRole', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ uid, role: newRole })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showToast(`Rol actualizado a ${newRole}`);
-          loadAdminData();
-        }
-      } catch (e) {
-        showToast('Error al cambiar rol', 'error');
-      }
-    }
-
     function openProductModal() {
       document.getElementById('productModal').style.display = 'flex';
       document.getElementById('shadesContainer').innerHTML = '';
+      document.getElementById('productForm').reset();
     }
     function closeProductModal() {
       document.getElementById('productModal').style.display = 'none';
@@ -699,6 +791,13 @@
     }
     function closeServiceModal() {
       document.getElementById('serviceModal').style.display = 'none';
+    }
+
+    function openBannerModal() {
+      document.getElementById('bannerModal').style.display = 'flex';
+    }
+    function closeBannerModal() {
+      document.getElementById('bannerModal').style.display = 'none';
     }
 
     function openPaymentModal() {
@@ -716,13 +815,17 @@
       shadeInputs.forEach(div => {
         const name = div.querySelector('.shade-name-input').value;
         const hex = div.querySelector('.shade-hex-input').value;
-        if (name.trim()) shades.push({ name, hex });
+        if (name.trim()) shades.push({ name: name.trim(), hex });
       });
 
+      const pPriceInput = document.getElementById('pPrice');
+      const pNameInput = document.getElementById('pName');
+
       const product = {
-        name: document.getElementById('pName').value,
+        id: document.getElementById('pId').value,
+        name: pNameInput.value,
         category: document.getElementById('pCategory').value,
-        price: Number(document.getElementById('pPrice').value),
+        price: Number(pPriceInput.value) || 0,
         image_url: document.getElementById('pImage').value || '/assets/foundation.jpg',
         description: document.getElementById('pDesc').value,
         shades: shades,
@@ -740,8 +843,11 @@
           showToast('Producto guardado con éxito');
           closeProductModal();
           loadAdminData();
+        } else {
+          showToast('Error: ' + (data.error || 'No se pudo guardar'), 'error');
         }
       } catch (err) {
+        console.error('saveProduct client error:', err);
         showToast('Error al guardar el producto', 'error');
       }
     }
@@ -751,7 +857,7 @@
       const service = {
         name: document.getElementById('sName').value,
         duration: document.getElementById('sDuration').value,
-        price: Number(document.getElementById('sPrice').value),
+        price: Number(document.getElementById('sPrice').value) || 0,
         availability: document.getElementById('sAvailability').value,
         image_url: document.getElementById('sImage').value || '/assets/service-makeup.jpg',
         description: document.getElementById('sDesc').value
@@ -771,6 +877,49 @@
         }
       } catch (err) {
         showToast('Error al guardar servicio', 'error');
+      }
+    }
+
+    async function saveBanner(e) {
+      e.preventDefault();
+      const bannerData = {
+        title: document.getElementById('bTitleInput').value,
+        subtitle: document.getElementById('bSubtitleInput').value,
+        desc: document.getElementById('bDescInput').value,
+        image_url: document.getElementById('bImageModalUrl').value || '/assets/hero-banner.jpg'
+      };
+
+      try {
+        const res = await fetch('/api/account?action=saveBanner', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bannerData)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Banner guardado exitosamente');
+          closeBannerModal();
+          loadAdminData();
+        }
+      } catch (err) {
+        showToast('Error al guardar banner', 'error');
+      }
+    }
+
+    async function updateReviewStatus(id, status) {
+      try {
+        const res = await fetch('/api/account?action=approveReview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, status })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Estado de reseña actualizado');
+          loadAdminData();
+        }
+      } catch (e) {
+        showToast('Error al actualizar reseña', 'error');
       }
     }
 
@@ -818,6 +967,21 @@
         loadAdminData();
       } catch (err) {
         showToast('Error al eliminar', 'error');
+      }
+    }
+
+    async function deleteBanner(id) {
+      if (!confirm('¿Eliminar este banner?')) return;
+      try {
+        await fetch('/api/account?action=deleteBanner', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        showToast('Banner eliminado');
+        loadAdminData();
+      } catch (err) {
+        showToast('Error al eliminar banner', 'error');
       }
     }
   </script>
