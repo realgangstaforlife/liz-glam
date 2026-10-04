@@ -8,6 +8,9 @@ class LizGlamApp {
     this.services = [];
     this.combos = [];
     this.banners = [];
+    this.reviews = [];
+    this.currentBannerIndex = 0;
+    this.bannerTimer = null;
     this.selectedShades = {};
     this.currentCategory = 'all';
     this.init();
@@ -17,7 +20,8 @@ class LizGlamApp {
     document.addEventListener('DOMContentLoaded', () => {
       this.bindEvents();
       this.loadCatalogData();
-      this.loadHeroBanner();
+      this.loadHeroBanners();
+      this.loadReviews();
     });
   }
 
@@ -71,25 +75,129 @@ class LizGlamApp {
     }
   }
 
-  async loadHeroBanner() {
+  async loadHeroBanners() {
     try {
       const res = await fetch(`${API_URL}?action=getBanners`).then(r => r.json());
       if (res.success && res.banners && res.banners.length > 0) {
-        const banner = res.banners[0];
-        const heroSection = document.querySelector('.hero');
-        const heroTitle = document.querySelector('.hero-title');
-        const heroDesc = document.querySelector('.hero-desc');
-        const heroTag = document.querySelector('.hero-tag');
-
-        if (banner.image_url && heroSection) {
-          heroSection.style.background = `linear-gradient(135deg, rgba(91,86,77,0.7) 0%, rgba(138,68,53,0.4) 100%), url('${banner.image_url}') center/cover no-repeat`;
-        }
-        if (banner.title && heroTitle) heroTitle.textContent = banner.title;
-        if (banner.desc && heroDesc) heroDesc.textContent = banner.desc;
-        if (banner.subtitle && heroTag) heroTag.textContent = banner.subtitle;
+        this.banners = res.banners;
+        this.startBannerCarousel();
       }
     } catch (e) {
       console.warn('Hero banner load notice:', e);
+    }
+  }
+
+  startBannerCarousel() {
+    if (this.banners.length === 0) return;
+    this.renderBanner(0);
+
+    if (this.banners.length > 1) {
+      if (this.bannerTimer) clearInterval(this.bannerTimer);
+      this.bannerTimer = setInterval(() => {
+        this.nextBanner();
+      }, 6000);
+    }
+  }
+
+  renderBanner(index) {
+    if (index < 0 || index >= this.banners.length) return;
+    this.currentBannerIndex = index;
+    const banner = this.banners[index];
+
+    const heroSection = document.querySelector('.hero');
+    const heroTitle = document.querySelector('.hero-title');
+    const heroDesc = document.querySelector('.hero-desc');
+    const heroTag = document.querySelector('.hero-tag');
+
+    if (banner.image_url && heroSection) {
+      heroSection.style.background = `linear-gradient(135deg, rgba(91,86,77,0.7) 0%, rgba(138,68,53,0.4) 100%), url('${banner.image_url}') center/cover no-repeat`;
+    }
+    if (banner.title && heroTitle) heroTitle.textContent = banner.title;
+    if (banner.desc && heroDesc) heroDesc.textContent = banner.desc;
+    if (banner.subtitle && heroTag) heroTag.textContent = banner.subtitle;
+
+    // Render Banner Control Dots
+    const dotsContainer = document.getElementById('heroBannerDots');
+    if (dotsContainer && this.banners.length > 1) {
+      dotsContainer.innerHTML = this.banners.map((b, i) => `
+        <button onclick="window.lizGlamApp.renderBanner(${i})" 
+          style="width: 12px; height: 12px; border-radius: 50%; background: ${i === index ? '#FFF' : 'rgba(255,255,255,0.4)'}; border: none; cursor: pointer; transition: all 0.3s;">
+        </button>
+      `).join('');
+    }
+  }
+
+  nextBanner() {
+    const nextIdx = (this.currentBannerIndex + 1) % this.banners.length;
+    this.renderBanner(nextIdx);
+  }
+
+  prevBanner() {
+    const prevIdx = (this.currentBannerIndex - 1 + this.banners.length) % this.banners.length;
+    this.renderBanner(prevIdx);
+  }
+
+  async loadReviews() {
+    try {
+      const res = await fetch(`${API_URL}?action=getReviews`).then(r => r.json());
+      if (res.success && res.reviews) {
+        this.reviews = res.reviews;
+        this.renderReviews();
+      }
+    } catch (e) {
+      console.warn('Reviews load error:', e);
+    }
+  }
+
+  renderReviews() {
+    const container = document.getElementById('reviewsContainer');
+    if (!container) return;
+
+    const approved = this.reviews.filter(r => r.status === 'approved');
+    if (approved.length === 0) {
+      container.innerHTML = `<p style="text-align: center; color: var(--text-muted);">Sé la primera persona en dejar una reseña sobre LizGlam ✨</p>`;
+      return;
+    }
+
+    container.innerHTML = approved.map(rev => `
+      <div style="background: #FFF; border-radius: var(--radius-lg); padding: 1.75rem; border: 1px solid var(--border-subtle); box-shadow: var(--shadow-sm);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+          <div style="color: #D4AF37;">
+            ${'★'.repeat(rev.rating)}${'☆'.repeat(5 - rev.rating)}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">${new Date(rev.createdAt).toLocaleDateString('es-CO')}</span>
+        </div>
+        <h4 class="font-serif" style="font-size: 1.15rem; margin-bottom: 0.5rem; text-transform: none;">${rev.title}</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.6;">"${rev.content}"</p>
+        <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 0.35rem;">
+          <i class="bi bi-patch-check-fill" style="color: var(--rose-gold);"></i> ${rev.userName}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async submitReview(e) {
+    e.preventDefault();
+    const userName = document.getElementById('revUserName').value;
+    const rating = document.getElementById('revRating').value;
+    const title = document.getElementById('revTitle').value;
+    const content = document.getElementById('revContent').value;
+
+    try {
+      const res = await fetch(`${API_URL}?action=saveReview`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userName, rating, title, content })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('✨ ¡Gracias por tu reseña! Ha sido enviada para verificación.');
+        document.getElementById('reviewForm').reset();
+        const modal = document.getElementById('reviewModal');
+        if (modal) modal.style.display = 'none';
+      }
+    } catch (err) {
+      showToast('Error al enviar reseña', 'error');
     }
   }
 
@@ -126,7 +234,6 @@ class LizGlamApp {
   selectShade(productId, shadeName) {
     this.selectedShades[productId] = shadeName;
     
-    // Update active UI dot
     const dots = document.querySelectorAll(`.shade-dot-${productId}`);
     dots.forEach(dot => {
       if (dot.dataset.shade === shadeName) {

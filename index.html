@@ -6,6 +6,9 @@
   <title>LizGlam Beauty | Maquillaje Profesional & Servicios de Belleza</title>
   <meta name="description" content="Descubre maquillaje profesional de alta gama, productos de belleza y agenda tu cita de maquillaje en LizGlam. Contacto directo por Instagram @lizglamstore.">
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/assets/foundation.jpg">
+
   <!-- Icons & Fonts -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
@@ -51,8 +54,8 @@
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section class="hero">
+  <!-- Hero Carousel Section -->
+  <section class="hero" style="position: relative;">
     <div class="container hero-content">
       <span class="hero-tag">Cosméticos & Estudio de Maquillaje</span>
       <h1 class="hero-title font-serif">Resalta tu Belleza Natural con Elegancia</h1>
@@ -66,6 +69,9 @@
         </a>
       </div>
     </div>
+
+    <!-- Carousel Controls & Dots -->
+    <div id="heroBannerDots" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; z-index: 10;"></div>
   </section>
 
   <!-- Main Content Container -->
@@ -103,13 +109,18 @@
       </div>
     </section>
 
-    <!-- Special Combos Section -->
+    <!-- Customer Reviews Section -->
     <section style="margin-bottom: 5rem;">
-      <div class="section-title">
-        <span>OFERTAS GLAMOUR</span>
-        <h2>Combos Especiales</h2>
+      <div class="section-title" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+        <div>
+          <span>OPINIONES DE CLIENTES</span>
+          <h2 style="margin-bottom: 0;">Reseñas & Experiencias</h2>
+        </div>
+        <button onclick="document.getElementById('reviewModal').style.display = 'flex'" class="btn btn-sm btn-outline-rose">
+          <i class="bi bi-pencil-square"></i> Dejar una Reseña
+        </button>
       </div>
-      <div id="combosGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem;">
+      <div id="reviewsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.75rem;">
         <!-- Loaded dynamically via JS -->
       </div>
     </section>
@@ -118,13 +129,46 @@
     <section style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 3rem 2rem; border: 1px solid var(--border-subtle); text-align: center;">
       <i class="bi bi-instagram" style="font-size: 3rem; color: #DC2743; margin-bottom: 1rem; display: block;"></i>
       <h2 class="font-serif" style="font-size: 2rem; margin-bottom: 0.5rem;">Síguenos en Instagram</h2>
-      <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 1.5rem auto;">Encuentra tutorials, transformaciones en vivo y atención personalizada vía DM en <strong>@lizglamstore</strong></p>
+      <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 1.5rem auto;">Encuentra tutoriales, transformaciones en vivo y atención personalizada vía DM en <strong>@lizglamstore</strong></p>
       <a href="https://instagram.com/lizglamstore" target="_blank" class="btn btn-instagram">
         <i class="bi bi-instagram"></i> Ir a @lizglamstore
       </a>
     </section>
 
   </main>
+
+  <!-- Submit Review Modal -->
+  <div id="reviewModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center;">
+    <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 480px;">
+      <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Dejar Reseña de Cliente</h3>
+      <form id="reviewForm" onsubmit="window.lizGlamApp.submitReview(event)">
+        <div class="form-group">
+          <label>Tu Nombre</label>
+          <input type="text" id="revUserName" class="form-control" required placeholder="Ej: Sofía M.">
+        </div>
+        <div class="form-group">
+          <label>Calificación (Estrellas)</label>
+          <select id="revRating" class="form-control">
+            <option value="5">★★★★★ (5/5)</option>
+            <option value="4">★★★★☆ (4/5)</option>
+            <option value="3">★★★☆☆ (3/5)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Título de tu Opinión</label>
+          <input type="text" id="revTitle" class="form-control" required placeholder="Ej: Me encantó el acabado!">
+        </div>
+        <div class="form-group">
+          <label>Tu Experiencia / Reseña</label>
+          <textarea id="revContent" class="form-control" rows="3" required placeholder="Escribe tu opinión..."></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button type="button" onclick="document.getElementById('reviewModal').style.display = 'none'" class="btn btn-sm btn-secondary" style="flex: 1;">Cancelar</button>
+          <button type="submit" class="btn btn-sm btn-primary" style="flex: 1;">Enviar Reseña</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer class="footer">
@@ -134,7 +178,6 @@
         <p>Tu plataforma de belleza y maquillaje profesional favorita. Productos seleccionados de alta gama y experiencias glam únicas.</p>
         <div class="social-icons">
           <a href="https://instagram.com/lizglamstore" target="_blank" class="social-icon" title="Instagram"><i class="bi bi-instagram"></i></a>
-          <a href="#" class="social-icon" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
         </div>
       </div>
       <div class="footer-col">
@@ -151,7 +194,6 @@
         <ul class="footer-links">
           <li><a href="/servicios.html">Maquillaje Social</a></li>
           <li><a href="/servicios.html">Maquillaje Novias</a></li>
-          <li><a href="/servicios.html">Lifting de Pestañas</a></li>
           <li><a href="/cuenta.html">Mi Cuenta</a></li>
         </ul>
       </div>
@@ -159,7 +201,6 @@
         <h4>Contacto & Pedidos</h4>
         <p><i class="bi bi-instagram"></i> @lizglamstore</p>
         <p><i class="bi bi-geo-alt"></i> lizglam.happycorner.top</p>
-        <p><i class="bi bi-clock"></i> Lun - Sáb: 8:00 AM - 7:00 PM</p>
       </div>
     </div>
     <div class="footer-bottom">
@@ -174,9 +215,7 @@
       <h3 class="font-serif"><i class="bi bi-bag-heart" style="color: var(--rose-gold-dark);"></i> Tu Carrito</h3>
       <button id="closeCartBtn" class="icon-btn"><i class="bi bi-x-lg"></i></button>
     </div>
-    <div class="cart-body" id="cartDrawerBody">
-      <!-- Items dynamically populated -->
-    </div>
+    <div class="cart-body" id="cartDrawerBody"></div>
     <div class="cart-footer">
       <div class="cart-total-row">
         <span>Total:</span>

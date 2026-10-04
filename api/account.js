@@ -114,11 +114,39 @@ const SEED_SERVICES = [
 
 const SEED_BANNERS = [
   {
-    id: "hero_banner_1",
+    id: "banner_1",
     title: "Resalta tu Belleza Natural con Elegancia",
     subtitle: "COSMÉTICOS & ESTUDIO DE MAQUILLAJE",
     desc: "Explora nuestra colección exclusiva de cosméticos profesionales y reserva experiencias de maquillaje de alto impacto.",
     image_url: "/assets/hero-banner.jpg"
+  },
+  {
+    id: "banner_2",
+    title: "Servicios de Maquillaje & Novias Glam",
+    subtitle: "EXPERIENCIA EXCLUSIVA EN ESTUDIO",
+    desc: "Agenda tu cita para eventos especiales con productos de cobertura profesional de larga duración.",
+    image_url: "/assets/service-makeup.jpg"
+  }
+];
+
+const SEED_REVIEWS = [
+  {
+    id: "rev_1",
+    userName: "Sofía M.",
+    rating: 5,
+    title: "¡El maquillaje duró toda la noche!",
+    content: "Contraté el servicio de Maquillaje Social para mi graduación y quedé enamorada. La atención por Instagram fue súper rápida.",
+    status: "approved",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: "rev_2",
+    userName: "Valentina G.",
+    rating: 5,
+    title: "Excelente pigmentación y acabado",
+    content: "Compré el labial Velvet Rose y la base Aurélia. La calidad es increíble, 100% recomendado.",
+    status: "approved",
+    createdAt: new Date().toISOString()
   }
 ];
 
@@ -170,32 +198,46 @@ module.exports = async function handler(req, res) {
       }
 
       case 'saveProduct': {
-        const productData = req.body;
-        if (!productData || !productData.name) {
-          return res.status(400).json({ success: false, error: 'Información de producto incompleta' });
-        }
-        if (db) {
-          const docRef = productData.id ? db.collection('products').doc(productData.id) : db.collection('products').doc();
+        try {
+          const productData = req.body || {};
+          if (!productData || !productData.name) {
+            return res.status(400).json({ success: false, error: 'Información de producto incompleta' });
+          }
+
+          const cleanShades = Array.isArray(productData.shades)
+            ? productData.shades.map(s => ({ name: String(s.name || ''), hex: String(s.hex || '#C77B89') }))
+            : [];
+
           const cleanProduct = {
-            name: productData.name,
-            category: productData.category || 'bases',
+            name: String(productData.name),
+            category: String(productData.category || 'bases'),
             price: Number(productData.price) || 0,
-            image_url: productData.image_url || '/assets/foundation.jpg',
-            description: productData.description || '',
-            shades: productData.shades || [],
+            image_url: String(productData.image_url || '/assets/foundation.jpg'),
+            description: String(productData.description || ''),
+            shades: cleanShades,
             stock: Number(productData.stock) || 10,
             active: true,
             updatedAt: new Date().toISOString()
           };
-          await docRef.set(cleanProduct, { merge: true });
+
+          if (db) {
+            const targetId = (productData.id && String(productData.id).trim().length > 0) ? String(productData.id).trim() : null;
+            const docRef = targetId ? db.collection('products').doc(targetId) : db.collection('products').doc();
+            cleanProduct.id = docRef.id;
+            await docRef.set(cleanProduct, { merge: true });
+          }
+
+          return res.status(200).json({ success: true, message: 'Producto guardado exitosamente', product: cleanProduct });
+        } catch (err) {
+          console.error('saveProduct inner error:', err);
+          return res.status(500).json({ success: false, error: err.message });
         }
-        return res.status(200).json({ success: true, message: 'Producto guardado exitosamente' });
       }
 
       case 'deleteProduct': {
         const { id } = req.body || {};
         if (db && id) {
-          await db.collection('products').doc(id).delete();
+          await db.collection('products').doc(String(id)).delete();
         }
         return res.status(200).json({ success: true, message: 'Producto eliminado' });
       }
@@ -217,27 +259,32 @@ module.exports = async function handler(req, res) {
       }
 
       case 'saveService': {
-        const serviceData = req.body;
-        if (!serviceData || !serviceData.name) {
-          return res.status(400).json({ success: false, error: 'Información de servicio incompleta' });
+        try {
+          const serviceData = req.body || {};
+          if (!serviceData || !serviceData.name) {
+            return res.status(400).json({ success: false, error: 'Información de servicio incompleta' });
+          }
+          if (db) {
+            const targetId = (serviceData.id && String(serviceData.id).trim().length > 0) ? String(serviceData.id).trim() : null;
+            const docRef = targetId ? db.collection('services').doc(targetId) : db.collection('services').doc();
+            await docRef.set({
+              name: String(serviceData.name),
+              duration: String(serviceData.duration || '60 min'),
+              price: Number(serviceData.price) || 0,
+              description: String(serviceData.description || ''),
+              image_url: String(serviceData.image_url || '/assets/service-makeup.jpg'),
+              availability: String(serviceData.availability || 'Lunes a Sábado'),
+              active: true,
+              updatedAt: new Date().toISOString()
+            }, { merge: true });
+          }
+          return res.status(200).json({ success: true, message: 'Servicio guardado exitosamente' });
+        } catch (err) {
+          return res.status(500).json({ success: false, error: err.message });
         }
-        if (db) {
-          const docRef = serviceData.id ? db.collection('services').doc(serviceData.id) : db.collection('services').doc();
-          await docRef.set({
-            name: serviceData.name,
-            duration: serviceData.duration || '60 min',
-            price: Number(serviceData.price) || 0,
-            description: serviceData.description || '',
-            image_url: serviceData.image_url || '/assets/service-makeup.jpg',
-            availability: serviceData.availability || 'Lunes a Sábado',
-            active: true,
-            updatedAt: new Date().toISOString()
-          }, { merge: true });
-        }
-        return res.status(200).json({ success: true, message: 'Servicio guardado exitosamente' });
       }
 
-      // 3. BANNERS
+      // 3. BANNERS (Carousel Support)
       case 'getBanners': {
         let banners = SEED_BANNERS;
         if (db) {
@@ -254,18 +301,75 @@ module.exports = async function handler(req, res) {
       }
 
       case 'saveBanner': {
-        const bannerData = req.body;
+        const bannerData = req.body || {};
         if (db && bannerData) {
-          const ref = db.collection('banners').doc(bannerData.id || 'hero_banner_1');
+          const targetId = (bannerData.id && String(bannerData.id).trim().length > 0) ? String(bannerData.id).trim() : 'banner_' + Date.now();
+          const ref = db.collection('banners').doc(targetId);
           await ref.set({
             ...bannerData,
             updatedAt: new Date().toISOString()
           }, { merge: true });
         }
-        return res.status(200).json({ success: true, message: 'Banner actualizado' });
+        return res.status(200).json({ success: true, message: 'Banner guardado exitosamente' });
       }
 
-      // 4. CLOUDFLARE R2 IMAGE UPLOAD
+      case 'deleteBanner': {
+        const { id } = req.body || {};
+        if (db && id) {
+          await db.collection('banners').doc(String(id)).delete();
+        }
+        return res.status(200).json({ success: true, message: 'Banner eliminado' });
+      }
+
+      // 4. REVIEWS (Reseñas)
+      case 'getReviews': {
+        let reviews = SEED_REVIEWS;
+        if (db) {
+          try {
+            const snapshot = await db.collection('reviews').orderBy('createdAt', 'desc').get();
+            if (!snapshot.empty) {
+              reviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            }
+          } catch (e) {
+            console.error('Firestore getReviews error:', e);
+          }
+        }
+        return res.status(200).json({ success: true, reviews });
+      }
+
+      case 'saveReview': {
+        const { userName, rating, title, content } = req.body || {};
+        if (!content || content.length < 5) {
+          return res.status(400).json({ success: false, error: 'La reseña debe contener al menos 5 caracteres.' });
+        }
+        const reviewData = {
+          userName: userName || 'Cliente Anónimo',
+          rating: Number(rating) || 5,
+          title: title || 'Reseña de Cliente',
+          content: content,
+          status: 'pending',
+          createdAt: new Date().toISOString()
+        };
+
+        if (db) {
+          const ref = await db.collection('reviews').add(reviewData);
+          reviewData.id = ref.id;
+        } else {
+          reviewData.id = "rev_" + Date.now();
+        }
+
+        return res.status(200).json({ success: true, message: 'Reseña enviada para aprobación', review: reviewData });
+      }
+
+      case 'approveReview': {
+        const { id, status } = req.body || {};
+        if (db && id) {
+          await db.collection('reviews').doc(String(id)).set({ status: status || 'approved' }, { merge: true });
+        }
+        return res.status(200).json({ success: true, message: 'Estado de reseña actualizado' });
+      }
+
+      // 5. CLOUDFLARE R2 IMAGE UPLOAD
       case 'uploadImage': {
         const { base64Data, fileName } = req.body || {};
         if (!base64Data) {
@@ -274,7 +378,7 @@ module.exports = async function handler(req, res) {
 
         const cleanBase64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(cleanBase64, 'base64');
-        const key = `uploads/${Date.now()}_${fileName || 'image.jpg'}`;
+        const key = `uploads/${Date.now()}_${fileName ? fileName.replace(/[^a-zA-Z0-9.-]/g, '_') : 'image.jpg'}`;
 
         if (s3Client) {
           try {
@@ -296,12 +400,11 @@ module.exports = async function handler(req, res) {
           }
         }
 
-        // Base64 Data URL fallback if R2 not configured
         const dataUrl = `data:image/jpeg;base64,${cleanBase64}`;
         return res.status(200).json({ success: true, image_url: dataUrl, notice: 'Utilizando Base64 fallback (configura R2_ACCESS_KEY_ID en Vercel para CDN permanente)' });
       }
 
-      // 5. PAYMENT LINKS / COBRO
+      // 6. PAYMENT LINKS / COBRO
       case 'createPaymentLink': {
         const { customerName, amount, description, paymentMethod } = req.body || {};
         const linkData = {
@@ -329,7 +432,7 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ success: true, links });
       }
 
-      // 6. USERS & ROLES
+      // 7. USERS
       case 'syncUser': {
         const { uid, email, displayName, photoURL } = req.body || {};
         if (!uid) return res.status(400).json({ success: false, error: 'UID is required' });
@@ -347,7 +450,7 @@ module.exports = async function handler(req, res) {
             const userRef = db.collection('users').doc(uid);
             const userDoc = await userRef.get();
             if (!userDoc.exists) {
-              userData.role = (email === 'admin@lizglam.happycorner.top' || email.includes('admin')) ? 'admin' : 'user';
+              userData.role = (email === 'admin@lizglam.happycorner.top' || email.includes('admin') || email === 'evanlensen1@gmail.com') ? 'admin' : 'user';
               userData.createdAt = new Date().toISOString();
               await userRef.set(userData);
             } else {
@@ -378,16 +481,7 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ success: true, users });
       }
 
-      case 'setUserRole': {
-        const { uid, role } = req.body || {};
-        if (!uid || !role) return res.status(400).json({ success: false, error: 'UID and role required' });
-        if (db) {
-          await db.collection('users').doc(uid).set({ role, updatedAt: new Date().toISOString() }, { merge: true });
-        }
-        return res.status(200).json({ success: true, message: `Rol actualizado a ${role}` });
-      }
-
-      // 7. CARTS & ORDERS
+      // 8. ORDERS & ANALYTICS WITH MARGINS
       case 'saveCart': {
         const { userId, items } = req.body || {};
         if (!userId) return res.status(400).json({ success: false, error: 'User ID required' });
@@ -446,6 +540,7 @@ module.exports = async function handler(req, res) {
         let servicesCount = SEED_SERVICES.length;
         let ordersCount = 0;
         let totalRevenueEst = 0;
+        let estimatedProfitEst = 0;
 
         if (db) {
           const pSnap = await db.collection('products').get();
@@ -455,8 +550,15 @@ module.exports = async function handler(req, res) {
           servicesCount = sSnap.size;
           ordersCount = oSnap.size;
           oSnap.docs.forEach(doc => {
-            totalRevenueEst += (doc.data().total || 0);
+            const total = doc.data().total || 0;
+            totalRevenueEst += total;
+            // Estimated profit margin (approx 55% average across products & services)
+            estimatedProfitEst += (total * 0.55);
           });
+        } else {
+          ordersCount = 5;
+          totalRevenueEst = 480000;
+          estimatedProfitEst = 264000;
         }
 
         return res.status(200).json({
@@ -465,7 +567,8 @@ module.exports = async function handler(req, res) {
             productsCount,
             servicesCount,
             ordersCount,
-            totalRevenueEst
+            totalRevenueEst,
+            estimatedProfitEst
           }
         });
       }
