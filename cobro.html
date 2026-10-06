@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Link de Cobro | LizGlam Beauty</title>
+  <meta name="description" content="Detalle de cobro y métodos de pago seguros de LizGlam Beauty Store.">
+  <link rel="icon" type="image/png" href="/assets/foundation.jpg">
+
+  <!-- Icons & Fonts -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="/styles/components.css">
+
+  <style>
+    body {
+      background-color: var(--bg-alt);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .cobro-card {
+      background: #FFFFFF;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+
+    .cobro-header {
+      background: var(--text-main);
+      color: #FFFFFF;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+
+    .cobro-header .brand {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .cobro-body {
+      padding: 2rem 1.5rem;
+    }
+
+    .amount-display {
+      text-align: center;
+      margin: 1.5rem 0;
+      padding: 1.25rem;
+      background: var(--bg-alt);
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .amount-val {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-top: 0.25rem;
+    }
+
+    .payment-option-card {
+      background: #FAF4F0;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .payment-option-info h4 {
+      font-size: 0.95rem;
+      margin-bottom: 0.2rem;
+      text-transform: uppercase;
+    }
+
+    .payment-option-info p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .copy-chip {
+      background: #FFFFFF;
+      border: 1px solid var(--border-strong);
+      padding: 0.4rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s ease;
+    }
+
+    .copy-chip:hover {
+      background: var(--text-main);
+      color: #FFF;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cobro-card">
+    <div class="cobro-header">
+      <div class="brand">LIZGLAM<span style="color: var(--rose-gold);">.</span></div>
+      <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; opacity: 0.85;">Comprobante Digital de Cobro</p>
+    </div>
+
+    <div class="cobro-body">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+          <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Cliente</span>
+          <h3 id="cobroCliente" class="font-serif" style="font-size: 1.15rem; margin: 0;">Cliente Estimado/a</h3>
+        </div>
+        <span id="cobroEstadoBadge" class="status-badge status-pending" style="padding: 0.35rem 0.85rem; font-size: 0.7rem; border-radius: 20px; background: rgba(235, 153, 57, 0.15); color: #D97706; font-weight: 700;">PENDIENTE DE PAGO</span>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Concepto / Detalle</span>
+        <p id="cobroConcepto" style="font-size: 0.95rem; font-weight: 500; margin-top: 0.2rem; line-height: 1.4;">Servicios / Productos LizGlam Beauty</p>
+      </div>
+
+      <div class="amount-display">
+        <span style="font-size: 0.725rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); font-weight: 600;">Total a Pagar</span>
+        <div id="cobroMonto" class="amount-val">$0 COP</div>
+      </div>
+
+      <h4 class="font-serif" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; color: var(--text-muted);">Métodos de Pago Disponibles</h4>
+
+      <!-- Nequi Option -->
+      <div class="payment-option-card">
+        <div class="payment-option-info">
+          <h4 style="color: #6C5CE7;"><i class="bi bi-phone-vibrate"></i> Nequi</h4>
+          <p id="nequiNum">300 123 4567</p>
+        </div>
+        <button onclick="copyAccount('nequiNum', 'Número Nequi copiado')" class="copy-chip">
+          <i class="bi bi-copy"></i> Copiar
+        </button>
+      </div>
+
+      <!-- Bancolombia Option -->
+      <div class="payment-option-card">
+        <div class="payment-option-info">
+          <h4 style="color: #F1C40F;"><i class="bi bi-bank"></i> Bancolombia (Ahorros)</h4>
+          <p id="bancolombiaNum">Ahorros: 031-000000-00</p>
+        </div>
+        <button onclick="copyAccount('bancolombiaNum', 'Número de cuenta copiado')" class="copy-chip">
+          <i class="bi bi-copy"></i> Copiar
+        </button>
+      </div>
+
+      <!-- Confirm WhatsApp Action -->
+      <a id="btnWhatsappConfirm" href="#" target="_blank" class="btn btn-primary btn-full" style="margin-top: 1.5rem; justify-content: center; gap: 0.5rem; background: #25D366; border-color: #25D366;">
+        <i class="bi bi-whatsapp"></i> Confirmar Pago por WhatsApp
+      </a>
+
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a href="/" style="font-size: 0.8rem; color: var(--text-muted); text-decoration: underline;">Volver a la Tienda Principal</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const cliente = urlParams.get('cliente') || urlParams.get('c') || 'Cliente Estimado/a';
+      const concepto = urlParams.get('concepto') || urlParams.get('desc') || 'Servicios & Productos LizGlam Beauty';
+      const montoRaw = urlParams.get('monto') || urlParams.get('m') || '0';
+      const estado = urlParams.get('estado') || 'pendiente';
+
+      const montoFormatted = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseFloat(montoRaw) || 0);
+
+      document.getElementById('cobroCliente').textContent = cliente;
+      document.getElementById('cobroConcepto').textContent = concepto;
+      document.getElementById('cobroMonto').textContent = montoFormatted;
+
+      if (estado === 'pagado') {
+        const badge = document.getElementById('cobroEstadoBadge');
+        badge.textContent = 'PAGO CONFIRMADO';
+        badge.style.background = 'rgba(46, 204, 113, 0.15)';
+        badge.style.color = '#2ECC71';
+      }
+
+      const waMsg = encodeURIComponent(`Hola LizGlam Beauty, adjunto mi comprobante de pago para el cobro:\n- Cliente: ${cliente}\n- Concepto: ${concepto}\n- Monto: ${montoFormatted}`);
+      document.getElementById('btnWhatsappConfirm').href = `https://wa.me/573000000000?text=${waMsg}`;
+    });
+
+    function copyAccount(elemId, textAlert) {
+      const text = document.getElementById(elemId).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert(textAlert);
+      });
+    }
+  </script>
+</body>
+</html>

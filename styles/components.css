@@ -112,17 +112,53 @@
   border-color: var(--text-main);
 }
 
-/* Grids */
+/* Grids & Sliders */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
   gap: 2.25rem;
 }
 
+.product-slider-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 1.75rem;
+  padding: 0.5rem 0.25rem 1.25rem 0.25rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.product-slider-track::-webkit-scrollbar {
+  display: none;
+}
+
+.product-slider-track .product-card {
+  min-width: 270px;
+  max-width: 300px;
+  flex: 0 0 auto;
+}
+
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 2.25rem;
+}
+
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.25rem;
+  }
+  
+  .best-sellers-section {
+    padding: 2.25rem 1.25rem !important;
+  }
+  
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 }
 
 /* Product Card - Atenea Aesthetic */

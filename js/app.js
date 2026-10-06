@@ -53,6 +53,18 @@ class LizGlamApp {
         this.filterAndRenderProducts(e.target.value);
       });
     }
+
+    const newInPrev = document.getElementById('newInPrev');
+    const newInNext = document.getElementById('newInNext');
+    const newInGrid = document.getElementById('newInGrid');
+    if (newInPrev && newInNext && newInGrid) {
+      newInPrev.addEventListener('click', () => {
+        newInGrid.scrollBy({ left: -310, behavior: 'smooth' });
+      });
+      newInNext.addEventListener('click', () => {
+        newInGrid.scrollBy({ left: 310, behavior: 'smooth' });
+      });
+    }
   }
 
   async loadCatalogData() {

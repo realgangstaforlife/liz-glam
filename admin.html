@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Panel de Administración | LizGlam Beauty</title>
   <meta name="description" content="Panel de administración protegido para gestión de catálogo, citas, banners, reseñas, cobros y pedidos de LizGlam.">
 
@@ -11,30 +11,36 @@
 
   <!-- Icons & Fonts -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
   
   <!-- Styles -->
   <link rel="stylesheet" href="/styles/main.css">
   <link rel="stylesheet" href="/styles/components.css">
 
-  <!-- Chart.js for Analytics Dashboards -->
+  <!-- Chart.js for Analytics Tab -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
   <style>
-    /* HappyCorner Style Sidebar Shell Layout */
+    /* HappyCorner Mobile-Responsive Admin Shell Layout */
     .admin-shell {
       display: flex;
-      min-height: calc(100vh - 78px);
+      min-height: calc(100vh - 70px);
+      position: relative;
     }
 
     .admin-sidebar {
-      width: 240px;
-      min-width: 240px;
+      width: 250px;
+      min-width: 250px;
       background: var(--bg-card);
       border-right: 1px solid var(--border-subtle);
       padding: 1.5rem 0.75rem;
       display: flex;
       flex-direction: column;
       gap: 0.35rem;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 999;
     }
 
     .sidebar-section-label {
@@ -73,8 +79,67 @@
 
     .admin-content-area {
       flex: 1;
-      padding: 2rem 2.5rem;
+      padding: 2rem 2.25rem;
       overflow-y: auto;
+      width: 100%;
+    }
+
+    /* Off-Canvas Backdrop for Mobile Drawer */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(28, 23, 24, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 998;
+    }
+
+    .sidebar-toggle-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: #FFF;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.35rem;
+    }
+
+    /* KPI Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .kpi-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .kpi-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--bg-alt);
+      color: var(--rose-gold-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .quick-actions-bar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
     }
 
     /* Modal Overlay Override */
@@ -91,17 +156,45 @@
       padding: 1rem;
     }
 
-    @media (max-width: 768px) {
-      .admin-shell {
+    /* Mobile Responsive Layout Styles matching HappyCorner */
+    @media (max-width: 900px) {
+      .sidebar-toggle-btn {
+        display: block;
+      }
+
+      .admin-sidebar {
+        position: fixed;
+        top: 65px;
+        left: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .admin-sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay.open {
+        display: block;
+      }
+
+      .admin-content-area {
+        padding: 1.25rem 1rem;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+
+      .quick-actions-bar {
         flex-direction: column;
       }
-      .admin-sidebar {
+
+      .quick-actions-bar .btn {
         width: 100%;
-        border-right: none;
-        border-bottom: 1px solid var(--border-subtle);
-      }
-      .admin-content-area {
-        padding: 1.5rem 1rem;
+        justify-content: center;
       }
     }
   </style>
@@ -109,17 +202,22 @@
 <body style="background: var(--bg-main);">
 
   <!-- Top Navigation Bar -->
-  <nav class="navbar" style="background: var(--text-main); color: #FFF;">
-    <div class="container navbar-inner" style="max-width: 100%; padding: 0 1.5rem;">
-      <a href="/" class="brand-logo" style="color: #FFF;">
-        LIZGLAM<span class="dot" style="color: var(--rose-gold);">.</span> <span style="font-size: 0.725rem; font-weight: 400; text-transform: uppercase; opacity: 0.8;">[ADMIN PANEL]</span>
-      </a>
+  <nav class="navbar" style="background: var(--text-main); color: #FFF; position: sticky; top: 0; z-index: 1000;">
+    <div class="container navbar-inner" style="max-width: 100%; padding: 0 1.25rem; height: 65px; display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <button class="sidebar-toggle-btn" id="adminSidebarToggle" onclick="toggleAdminSidebar()" aria-label="Abrir Menú Admin">
+          <i class="bi bi-list"></i>
+        </button>
+        <a href="/" class="brand-logo" style="color: #FFF; font-size: 1.25rem;">
+          LIZGLAM<span class="dot" style="color: var(--rose-gold);">.</span> <span style="font-size: 0.7rem; font-weight: 400; text-transform: uppercase; opacity: 0.8;">[ADMIN PANEL]</span>
+        </a>
+      </div>
 
       <!-- Header Corner Status -->
       <div style="display: flex; align-items: center; gap: 1rem;">
         <div id="adminUserStatus"></div>
-        <a href="/" class="btn btn-sm btn-outline-rose" style="color: #FFF; border-color: #FFF;">
-          <i class="bi bi-house"></i> Volver a la Tienda
+        <a href="/" class="btn btn-sm btn-outline-rose" style="color: #FFF; border-color: #FFF; padding: 0.4rem 0.85rem; font-size: 0.75rem;">
+          <i class="bi bi-house"></i> Tienda
         </a>
       </div>
     </div>
@@ -139,22 +237,33 @@
     </div>
   </div>
 
+  <!-- Mobile Off-Canvas Overlay -->
+  <div id="adminSidebarOverlay" class="sidebar-overlay" onclick="toggleAdminSidebar(false)"></div>
+
   <!-- Admin Main Dashboard Shell (HappyCorner Layout) -->
   <div id="adminDashboardContent" class="admin-shell" style="display: none;">
 
-    <!-- Left Sidebar -->
-    <aside class="admin-sidebar">
-      <div class="sidebar-section-label">Métricas & Reportes</div>
-      <div onclick="switchTab('analytics')" class="sidebar-item active" id="tabBtnAnalytics">
-        <i class="bi bi-graph-up-arrow"></i> Analíticas & Gráficos
+    <!-- Left Sidebar Drawer -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-section-label">Panel Principal</div>
+      <div onclick="switchTab('inicio')" class="sidebar-item active" id="tabBtnInicio">
+        <i class="bi bi-house-heart"></i> Resumen & Inicio
       </div>
 
-      <div class="sidebar-section-label">Gestión Principal</div>
+      <div class="sidebar-section-label">Gestión Comercial</div>
       <div onclick="switchTab('products')" class="sidebar-item" id="tabBtnProducts">
         <i class="bi bi-box-seam"></i> Inventario Productos
       </div>
       <div onclick="switchTab('services')" class="sidebar-item" id="tabBtnServices">
         <i class="bi bi-scissors"></i> Servicios & Citas
+      </div>
+
+      <div class="sidebar-section-label">Cobros & Pedidos</div>
+      <div onclick="switchTab('payments')" class="sidebar-item" id="tabBtnPayments">
+        <i class="bi bi-credit-card"></i> Links de Cobro
+      </div>
+      <div onclick="switchTab('orders')" class="sidebar-item" id="tabBtnOrders">
+        <i class="bi bi-instagram"></i> Pedidos Instagram
       </div>
 
       <div class="sidebar-section-label">Contenido & Marca</div>
@@ -165,82 +274,103 @@
         <i class="bi bi-star"></i> Reseñas de Clientes
       </div>
 
-      <div class="sidebar-section-label">Ventas & Clientes</div>
-      <div onclick="switchTab('payments')" class="sidebar-item" id="tabBtnPayments">
-        <i class="bi bi-credit-card"></i> Links de Cobro
-      </div>
-      <div onclick="switchTab('orders')" class="sidebar-item" id="tabBtnOrders">
-        <i class="bi bi-instagram"></i> Pedidos Instagram
+      <div class="sidebar-section-label">Reportes</div>
+      <div onclick="switchTab('analytics')" class="sidebar-item" id="tabBtnAnalytics">
+        <i class="bi bi-graph-up-arrow"></i> Analíticas & Gráficos
       </div>
     </aside>
 
     <!-- Main Content Area -->
     <main class="admin-content-area">
 
-      <!-- TAB 0: Analytics Dashboard & Charts -->
-      <div id="tabAnalytics" class="tab-content">
-        <!-- KPI Cards Row -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-          <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--bg-alt); color: var(--text-main); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-              <i class="bi bi-box-seam"></i>
-            </div>
+      <!-- TAB 1: INICIO & RESUMEN DE ACTIVIDAD (Default screen matching HappyCorner) -->
+      <div id="tabInicio" class="tab-content" style="display: block;">
+        
+        <!-- Welcome Greeting Banner -->
+        <div style="background: var(--bg-alt); padding: 1.75rem 2rem; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); margin-bottom: 2rem;">
+          <h2 id="greetingTitle" class="font-serif" style="font-size: 1.75rem; margin-bottom: 0.25rem;">¡Buenas noches, LizGlam! ✨</h2>
+          <p id="greetingSub" style="color: var(--text-muted); font-size: 0.875rem; margin: 0;">Resumen en tiempo real de tu tienda y estudio de maquillaje.</p>
+        </div>
+
+        <!-- KPI Summary Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon"><i class="bi bi-box-seam"></i></div>
             <div>
-              <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Productos</div>
+              <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Productos</div>
               <div id="statProducts" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">0</div>
             </div>
           </div>
 
-          <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 44px; height: 44px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-              <i class="bi bi-scissors"></i>
-            </div>
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background: #e0f2fe; color: #0284c7;"><i class="bi bi-scissors"></i></div>
             <div>
-              <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Servicios</div>
+              <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Servicios</div>
               <div id="statServices" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">0</div>
             </div>
           </div>
 
-          <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 44px; height: 44px; border-radius: 50%; background: #fce7f3; color: #db2777; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-              <i class="bi bi-instagram"></i>
-            </div>
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background: #fce7f3; color: #db2777;"><i class="bi bi-instagram"></i></div>
             <div>
-              <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Pedidos IG</div>
+              <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Pedidos IG</div>
               <div id="statOrders" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">0</div>
             </div>
           </div>
 
-          <div class="admin-card" style="margin-bottom: 0; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 44px; height: 44px; border-radius: 50%; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-              <i class="bi bi-graph-up-arrow"></i>
-            </div>
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background: #FEF3C7; color: #D97706;"><i class="bi bi-star"></i></div>
             <div>
-              <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Ganancia Est.</div>
-              <div id="statProfit" style="font-size: 1.35rem; font-weight: 700; font-family: var(--font-serif);">$ 0</div>
+              <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Reseñas</div>
+              <div id="statReviews" style="font-size: 1.5rem; font-weight: 700; font-family: var(--font-serif);">0</div>
             </div>
           </div>
         </div>
 
-        <!-- Charts Row -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-          <div class="admin-card">
-            <h3 class="font-serif" style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-main);">💰 Ingresos por Mes (COP)</h3>
-            <canvas id="chart-revenue" height="220"></canvas>
-          </div>
-          <div class="admin-card">
-            <h3 class="font-serif" style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-main);">💄 Ventas por Categoría de Maquillaje</h3>
-            <canvas id="chart-products" height="220"></canvas>
+        <!-- Quick Access Action Buttons -->
+        <h3 class="font-serif" style="font-size: 1.15rem; margin-bottom: 1rem;">Acciones Rápidas</h3>
+        <div class="quick-actions-bar">
+          <button onclick="openProductModal()" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg"></i> Agregar Producto
+          </button>
+          <button onclick="openServiceModal()" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg"></i> Agregar Servicio
+          </button>
+          <button onclick="openPaymentModal()" class="btn btn-sm btn-outline-rose">
+            <i class="bi bi-credit-card"></i> Crear Link de Cobro
+          </button>
+          <button onclick="openReviewModalAdmin()" class="btn btn-sm btn-outline-rose">
+            <i class="bi bi-star"></i> Publicar Reseña Oficial
+          </button>
+          <a href="/" target="_blank" class="btn btn-sm btn-secondary">
+            <i class="bi bi-eye"></i> Ver Tienda
+          </a>
+        </div>
+
+        <!-- Recent Activity Section -->
+        <div class="admin-card">
+          <h3 class="font-serif" style="font-size: 1.25rem; margin-bottom: 1rem;">Últimos Pedidos Registrados</h3>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Cliente</th>
+                  <th>Canal</th>
+                  <th>Ítems</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody id="recentOrdersTableBody">
+                <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Cargando actividad...</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <div class="admin-card">
-          <h3 class="font-serif" style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-main);">👤 Top Clientes por Volumen de Compra</h3>
-          <canvas id="chart-clients" height="130"></canvas>
-        </div>
       </div>
 
-      <!-- Tab 1: Products Management -->
+      <!-- TAB 2: PRODUCTS MANAGEMENT -->
       <div id="tabProducts" class="admin-card" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
           <h3 class="font-serif" style="font-size: 1.5rem;">Catálogo de Productos</h3>
@@ -266,7 +396,7 @@
         </div>
       </div>
 
-      <!-- Tab 2: Services Management -->
+      <!-- TAB 3: SERVICES MANAGEMENT -->
       <div id="tabServices" class="admin-card" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
           <h3 class="font-serif" style="font-size: 1.5rem;">Servicios & Citas de Maquillaje</h3>
@@ -291,12 +421,60 @@
         </div>
       </div>
 
-      <!-- Tab 3: Banners & Hero Carousel Management -->
+      <!-- TAB 4: PAYMENT LINKS / COBRO -->
+      <div id="tabPayments" class="admin-card" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 0.25rem;">Generador de Links de Cobro</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Genera enlaces de cobro y envíalos directamente a tus clientes.</p>
+          </div>
+          <button onclick="openPaymentModal()" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg"></i> Crear Nuevo Cobro
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Concepto</th>
+                <th>Monto</th>
+                <th>Método</th>
+                <th>Acciones de Cobro</th>
+              </tr>
+            </thead>
+            <tbody id="paymentLinksTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 5: ORDERS HISTORY -->
+      <div id="tabOrders" class="admin-card" style="display: none;">
+        <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Pedidos Redirigidos a Instagram</h3>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Canal</th>
+                <th>Ítems</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 6: BANNERS MANAGEMENT -->
       <div id="tabBanners" class="admin-card" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
           <h3 class="font-serif" style="font-size: 1.5rem;">Imágenes de Carrusel & Portada</h3>
           <button onclick="openBannerModal()" class="btn btn-sm btn-primary">
-            <i class="bi bi-plus-lg"></i> Agregar Banner a Carrusel
+            <i class="bi bi-plus-lg"></i> Agregar Banner
           </button>
         </div>
 
@@ -315,16 +493,15 @@
         </div>
       </div>
 
-      <!-- Tab 4: Reviews Management -->
+      <!-- TAB 7: REVIEWS MANAGEMENT (Only Admin can publish/manage) -->
       <div id="tabReviews" class="admin-card" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
           <div>
-            <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 0.25rem;">Aprobación de Reseñas de Clientes</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Revisa, aprueba o elimina testimonios recibidos.</p>
+            <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 0.25rem;">Gestión de Reseñas de Clientes</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Publica testimonios oficiales o gestiona valoraciones recibidas.</p>
           </div>
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
             <button onclick="filterReviews('all')" class="btn btn-sm btn-outline-rose" id="btnRevAll">Todas</button>
-            <button onclick="filterReviews('pending')" class="btn btn-sm btn-outline-rose" id="btnRevPending">Pendientes ⏳</button>
             <button onclick="filterReviews('approved')" class="btn btn-sm btn-outline-rose" id="btnRevApproved">Aprobadas ✓</button>
             <button onclick="openReviewModalAdmin()" class="btn btn-sm btn-primary">
               <i class="bi bi-plus-lg"></i> Publicar Reseña Oficial
@@ -349,48 +526,24 @@
         </div>
       </div>
 
-      <!-- Tab 5: Payment Links / Cobro -->
-      <div id="tabPayments" class="admin-card" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-          <h3 class="font-serif" style="font-size: 1.5rem;">Generador de Links de Cobro</h3>
-          <button onclick="openPaymentModal()" class="btn btn-sm btn-primary">
-            <i class="bi bi-plus-lg"></i> Crear Nuevo Cobro
-          </button>
+      <!-- TAB 8: ANALYTICS & CHARTS -->
+      <div id="tabAnalytics" class="tab-content" style="display: none;">
+        <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Analíticas & Estadísticas de Ventas</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+          <div class="admin-card">
+            <h4 class="font-serif" style="font-size: 1.15rem; margin-bottom: 1rem;">💰 Ingresos por Mes (COP)</h4>
+            <canvas id="chart-revenue" height="220"></canvas>
+          </div>
+          <div class="admin-card">
+            <h4 class="font-serif" style="font-size: 1.15rem; margin-bottom: 1rem;">💄 Ventas por Categoría</h4>
+            <canvas id="chart-products" height="220"></canvas>
+          </div>
         </div>
 
-        <div class="table-responsive">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Cliente</th>
-                <th>Concepto</th>
-                <th>Monto</th>
-                <th>Método</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
-            <tbody id="paymentLinksTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Tab 6: Orders History -->
-      <div id="tabOrders" class="admin-card" style="display: none;">
-        <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Pedidos Redirigidos a Instagram</h3>
-        <div class="table-responsive">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Cliente</th>
-                <th>Canal</th>
-                <th>Ítems</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody id="ordersTableBody"></tbody>
-          </table>
+        <div class="admin-card">
+          <h4 class="font-serif" style="font-size: 1.15rem; margin-bottom: 1rem;">👤 Top Clientes por Volumen de Compra</h4>
+          <canvas id="chart-clients" height="130"></canvas>
         </div>
       </div>
 
@@ -643,6 +796,7 @@
               <span style="font-size: 0.8rem; color: #FFF; font-weight: 500;">${user.displayName} (Admin)</span>
             </div>
           `;
+          updateGreeting(user.displayName);
           loadAdminData();
         } else {
           deniedContainer.style.display = 'block';
@@ -656,14 +810,42 @@
       });
     });
 
+    function toggleAdminSidebar(forceState) {
+      const sidebar = document.getElementById('adminSidebar');
+      const overlay = document.getElementById('adminSidebarOverlay');
+      if (!sidebar || !overlay) return;
+
+      const isOpen = forceState !== undefined ? forceState : !sidebar.classList.contains('open');
+      sidebar.classList.toggle('open', isOpen);
+      overlay.classList.toggle('open', isOpen);
+    }
+
+    function updateGreeting(name) {
+      const hour = new Date().getHours();
+      let greeting = '¡Buenas noches';
+      if (hour >= 5 && hour < 12) greeting = '¡Buenos días';
+      else if (hour >= 12 && hour < 19) greeting = '¡Buenas tardes';
+
+      const greetingTitle = document.getElementById('greetingTitle');
+      const greetingSub = document.getElementById('greetingSub');
+      const todayStr = new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      if (greetingTitle) greetingTitle.textContent = `${greeting}, ${name || 'LizGlam'}! ✨`;
+      if (greetingSub) greetingSub.textContent = `Hoy es ${todayStr}. Resumen en tiempo real de tu tienda.`;
+    }
+
     function switchTab(tab) {
-      const tabs = ['analytics', 'products', 'services', 'banners', 'reviews', 'payments', 'orders'];
+      const tabs = ['inicio', 'products', 'services', 'payments', 'orders', 'banners', 'reviews', 'analytics'];
       tabs.forEach(t => {
         const el = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
         const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
         if (el) el.style.display = (t === tab) ? 'block' : 'none';
         if (btn) btn.classList.toggle('active', t === tab);
       });
+
+      // Close mobile sidebar drawer after picking a tab
+      toggleAdminSidebar(false);
+
       if (tab === 'analytics' && window.currentAdminData) {
         renderCharts(window.currentAdminData.orders, window.currentAdminData.products, window.currentAdminData.services);
       }
@@ -734,7 +916,7 @@
         _analyticsCharts.products = new Chart(prodCanvas, {
           type: 'doughnut',
           data: {
-            labels: ['Bases', 'Labiales', 'Sombras', 'Rubores', 'Servicios & Citas'],
+            labels: ['Bases', 'Labiales', 'Sombras', 'Rubores', 'Servicios'],
             datasets: [{
               data: [42, 28, 18, 12, 25],
               backgroundColor: ['#C77B89', '#D4AF37', '#9B51E0', '#F2994A', '#27AE60'],
@@ -776,14 +958,13 @@
 
     async function loadAdminData() {
       try {
-        const [prodRes, servRes, revRes, ordRes, bannerRes, payRes, analyticsRes] = await Promise.all([
+        const [prodRes, servRes, revRes, ordRes, bannerRes, payRes] = await Promise.all([
           fetch('/api/account?action=getProducts').then(r => r.json()),
           fetch('/api/account?action=getServices').then(r => r.json()),
           fetch('/api/account?action=getReviews').then(r => r.json()),
           fetch('/api/account?action=getOrders').then(r => r.json()),
           fetch('/api/account?action=getBanners').then(r => r.json()),
-          fetch('/api/account?action=getPaymentLinks').then(r => r.json()),
-          fetch('/api/account?action=getAnalytics').then(r => r.json())
+          fetch('/api/account?action=getPaymentLinks').then(r => r.json())
         ]);
 
         const products = prodRes.products || [];
@@ -795,22 +976,18 @@
 
         window.currentAdminData = { products, services, reviews, orders, banners, paymentLinks };
 
-        if (analyticsRes.analytics) {
-          document.getElementById('statProducts').textContent = analyticsRes.analytics.productsCount || products.length;
-          document.getElementById('statServices').textContent = analyticsRes.analytics.servicesCount || services.length;
-          document.getElementById('statOrders').textContent = analyticsRes.analytics.ordersCount || orders.length;
-          document.getElementById('statProfit').textContent = formatCOP(analyticsRes.analytics.estimatedProfitEst || 2450000);
-        }
+        document.getElementById('statProducts').textContent = products.length;
+        document.getElementById('statServices').textContent = services.length;
+        document.getElementById('statOrders').textContent = orders.length;
+        document.getElementById('statReviews').textContent = reviews.length;
 
         renderProductsTable(products);
         renderServicesTable(services);
         renderBannersTable(banners);
         renderReviewsTable(reviews);
         renderOrdersTable(orders);
+        renderRecentOrdersTable(orders);
         renderPaymentLinksTable(paymentLinks);
-
-        // Render Analytics Charts
-        renderCharts(orders, products, services);
       } catch (err) {
         console.error('Error loading admin data:', err);
       }
@@ -875,7 +1052,7 @@
           <td><span style="font-size: 0.8rem; color: var(--text-muted);">${p.shades ? p.shades.length : 0} tonos</span></td>
           <td>${formatCOP(p.price)}</td>
           <td>
-            <button onclick="deleteProduct('${p.id}')" style="color: #dc2743; border: none; background: none; cursor: pointer;">
+            <button onclick="deleteProduct('${p.id}')" style="color: #dc2743; border: none; background: none; cursor: pointer;" title="Eliminar">
               <i class="bi bi-trash"></i>
             </button>
           </td>
@@ -912,7 +1089,7 @@
           <td><strong>${b.title || '-'}</strong></td>
           <td>${b.subtitle || '-'}</td>
           <td>
-            <button onclick="deleteBanner('${b.id}')" style="color: #dc2743; border: none; background: none; cursor: pointer;">
+            <button onclick="deleteBanner('${b.id}')" style="color: #dc2743; border: none; background: none; cursor: pointer;" title="Eliminar">
               <i class="bi bi-trash"></i>
             </button>
           </td>
@@ -924,11 +1101,9 @@
       if (!window.currentAdminData || !window.currentAdminData.reviews) return;
       
       const btnAll = document.getElementById('btnRevAll');
-      const btnPending = document.getElementById('btnRevPending');
       const btnApproved = document.getElementById('btnRevApproved');
 
       if (btnAll) btnAll.classList.toggle('active', filterStatus === 'all');
-      if (btnPending) btnPending.classList.toggle('active', filterStatus === 'pending');
       if (btnApproved) btnApproved.classList.toggle('active', filterStatus === 'approved');
 
       let filtered = window.currentAdminData.reviews;
@@ -998,9 +1173,28 @@
       }
       tbody.innerHTML = orders.map(o => `
         <tr>
-          <td>${new Date(o.created_at).toLocaleString('es-CO')}</td>
+          <td>${new Date(o.created_at || Date.now()).toLocaleString('es-CO')}</td>
           <td>${o.customer ? o.customer.name : 'Cliente'}</td>
           <td><span style="background: #fce7f3; color: #db2777; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">${o.channel || 'Instagram'}</span></td>
+          <td>${(o.items || []).map(i => `${i.quantity}x ${i.name}`).join(', ')}</td>
+          <td><strong>${formatCOP(o.total || 0)}</strong></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderRecentOrdersTable(orders) {
+      const tbody = document.getElementById('recentOrdersTableBody');
+      if (!tbody) return;
+      if (orders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No hay actividad reciente de pedidos.</td></tr>`;
+        return;
+      }
+      const recent = orders.slice(0, 5);
+      tbody.innerHTML = recent.map(o => `
+        <tr>
+          <td>${new Date(o.created_at || Date.now()).toLocaleDateString('es-CO')}</td>
+          <td><strong>${o.customer ? o.customer.name : 'Cliente'}</strong></td>
+          <td><span style="background: #fce7f3; color: #db2777; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.725rem; font-weight: 600;">${o.channel || 'Instagram'}</span></td>
           <td>${(o.items || []).map(i => `${i.quantity}x ${i.name}`).join(', ')}</td>
           <td><strong>${formatCOP(o.total || 0)}</strong></td>
         </tr>
@@ -1013,25 +1207,36 @@
         tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No hay links de cobro generados.</td></tr>`;
         return;
       }
-      tbody.innerHTML = links.map(l => `
-        <tr>
-          <td><code style="font-size: 0.75rem;">${l.id}</code></td>
-          <td><strong>${l.customerName}</strong></td>
-          <td>${l.description}</td>
-          <td><strong>${formatCOP(l.amount)}</strong></td>
-          <td><span style="font-size: 0.75rem; background: var(--bg-alt); padding: 0.2rem 0.5rem; border-radius: 4px;">${l.paymentMethod}</span></td>
-          <td>
-            <div style="display: flex; gap: 0.5rem;">
-              <button onclick="copyPaymentText('${l.customerName}', '${l.amount}', '${l.description}')" class="btn btn-sm btn-outline-rose" title="Copiar mensaje">
-                <i class="bi bi-clipboard"></i> Copiar Cobro
-              </button>
-              <button onclick="sendPaymentToInstagram('${l.customerName}', '${l.amount}', '${l.description}')" class="btn btn-sm btn-instagram" title="Enviar por DM a @lizglamstore">
-                <i class="bi bi-instagram"></i> Enviar IG
-              </button>
-            </div>
-          </td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = links.map(l => {
+        const linkUrl = `${window.location.origin}/cobro?cliente=${encodeURIComponent(l.customerName)}&monto=${l.amount}&concepto=${encodeURIComponent(l.description)}`;
+        return `
+          <tr>
+            <td><code style="font-size: 0.75rem;">${l.id}</code></td>
+            <td><strong>${l.customerName}</strong></td>
+            <td>${l.description}</td>
+            <td><strong>${formatCOP(l.amount)}</strong></td>
+            <td><span style="font-size: 0.75rem; background: var(--bg-alt); padding: 0.2rem 0.5rem; border-radius: 4px;">${l.paymentMethod}</span></td>
+            <td>
+              <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                <button onclick="copyPaymentUrl('${linkUrl}')" class="btn btn-sm btn-primary" title="Copiar enlace web de cobro">
+                  <i class="bi bi-link-45deg"></i> Copiar Link
+                </button>
+                <button onclick="copyPaymentText('${l.customerName}', '${l.amount}', '${l.description}')" class="btn btn-sm btn-outline-rose" title="Copiar mensaje formateado">
+                  <i class="bi bi-clipboard"></i> Copiar Mensaje
+                </button>
+                <button onclick="sendPaymentToInstagram('${l.customerName}', '${l.amount}', '${l.description}')" class="btn btn-sm btn-instagram" title="Enviar por DM a @lizglamstore">
+                  <i class="bi bi-instagram"></i> Enviar IG
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function copyPaymentUrl(url) {
+      navigator.clipboard.writeText(url);
+      showToast('✨ ¡Enlace de cobro copiado al portapapeles!');
     }
 
     function sendPaymentToInstagram(name, amount, desc) {
@@ -1249,7 +1454,8 @@
     }
 
     function copyPaymentText(name, amount, desc) {
-      const text = `💳 *LIZGLAM BEAUTY - SOLICITUD DE PAGO*\n👤 Cliente: ${name}\n📌 Concepto: ${desc}\n💰 Monto: ${formatCOP(amount)}\n\nContactar vía Instagram @lizglamstore para enviar comprobante de Nequi/Bancolombia 💕`;
+      const linkUrl = `${window.location.origin}/cobro?cliente=${encodeURIComponent(name)}&monto=${amount}&concepto=${encodeURIComponent(desc)}`;
+      const text = `💳 *LIZGLAM BEAUTY - SOLICITUD DE PAGO*\n👤 Cliente: ${name}\n📌 Concepto: ${desc}\n💰 Monto: ${formatCOP(amount)}\n\n👉 Enlace de Pago: ${linkUrl}\n\nContactar vía Instagram @lizglamstore para enviar comprobante 💕`;
       navigator.clipboard.writeText(text);
       showToast('¡Texto de cobro copiado al portapapeles!');
     }

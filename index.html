@@ -79,26 +79,39 @@
 
     <!-- SECTION 1: NEW IN (Novedades) -->
     <section style="margin-bottom: 4.5rem;">
-      <div class="section-title" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <div>
-          <span>LO MÁS RECIENTE</span>
-          <h2 style="margin-bottom: 0;">NEW IN</h2>
+          <span style="font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--rose-gold); font-weight: 600; display: block; margin-bottom: 0.25rem;">Colección Exclusiva</span>
+          <h2 class="font-serif" style="font-size: 2rem; margin: 0;">NEW IN</h2>
         </div>
-        <a href="/productos" class="btn btn-sm btn-outline-rose">
-          Ver Todo <i class="bi bi-arrow-right"></i>
-        </a>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <!-- Slider Navigation Arrows for NEW IN -->
+          <div style="display: flex; gap: 0.4rem;">
+            <button id="newInPrev" class="btn btn-sm btn-secondary" aria-label="Anterior" style="padding: 0.5rem 0.85rem; border-radius: 50%;">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <button id="newInNext" class="btn btn-sm btn-secondary" aria-label="Siguiente" style="padding: 0.5rem 0.85rem; border-radius: 50%;">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+          <a href="/productos" class="btn btn-sm btn-outline-rose">
+            Ver Todo <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
       </div>
-      <div id="newInGrid" class="product-grid">
+
+      <!-- Horizontal Scroll Track for NEW IN -->
+      <div id="newInGrid" class="product-slider-track">
         <!-- Loaded dynamically via JS -->
       </div>
     </section>
 
     <!-- SECTION 2: BEST SELLERS (Más Vendidos) -->
-    <section style="margin-bottom: 4.5rem; background: var(--bg-alt); padding: 3rem 2rem; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
-      <div class="section-title" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+    <section class="best-sellers-section" style="margin-bottom: 4.5rem; background: var(--bg-alt); padding: 3.5rem 2.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;">
         <div>
-          <span>LOS FAVORITOS DE NUESTRAS CLIENTAS</span>
-          <h2 style="margin-bottom: 0;">BEST SELLERS</h2>
+          <span style="font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--rose-gold); font-weight: 600; display: block; margin-bottom: 0.25rem;">LOS FAVORITOS DE NUESTRAS CLIENTAS</span>
+          <h2 class="font-serif" style="font-size: 2rem; margin: 0;">BEST SELLERS</h2>
         </div>
         <a href="/productos" class="btn btn-sm btn-primary">
           Explorar Catálogo <i class="bi bi-bag-heart"></i>
@@ -117,7 +130,7 @@
       </div>
 
       <!-- Category Filter Pills -->
-      <div class="category-filter" style="margin-bottom: 2rem;">
+      <div class="category-filter" style="margin-bottom: 2.5rem;">
         <button onclick="window.lizGlamApp.setCategory('all')" class="filter-pill active" data-category="all">Todos</button>
         <button onclick="window.lizGlamApp.setCategory('bases')" class="filter-pill" data-category="bases">Bases</button>
         <button onclick="window.lizGlamApp.setCategory('labiales')" class="filter-pill" data-category="labiales">Labiales</button>
@@ -142,18 +155,13 @@
       </div>
     </section>
 
-    <!-- SECTION 5: RESEÑAS & TESTIMONIOS -->
+    <!-- SECTION 5: RESEÑAS & TESTIMONIOS (Verificadas por Admin) -->
     <section style="margin-bottom: 4.5rem;">
-      <div class="section-title" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
-        <div>
-          <span>EXPERIENCIAS REALES</span>
-          <h2 style="margin-bottom: 0;">Reseñas & Experiencias</h2>
-        </div>
-        <button onclick="document.getElementById('reviewModal').style.display = 'flex'" class="btn btn-sm btn-outline-rose">
-          <i class="bi bi-pencil-square"></i> Dejar una Reseña
-        </button>
+      <div style="text-align: center; margin-bottom: 2.5rem;">
+        <span style="font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--rose-gold); font-weight: 600; display: block; margin-bottom: 0.25rem;">EXPERIENCIAS REALES</span>
+        <h2 class="font-serif" style="font-size: 2rem; margin: 0;">Reseñas & Experiencias de Clientas</h2>
       </div>
-      <div id="reviewsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.75rem;">
+      <div id="reviewsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.75rem;">
         <!-- Loaded dynamically via JS -->
       </div>
     </section>
@@ -169,39 +177,6 @@
     </section>
 
   </main>
-
-  <!-- Submit Review Modal -->
-  <div id="reviewModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center;">
-    <div style="background: #FFF; border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 480px;">
-      <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 1.25rem;">Dejar Reseña de Cliente</h3>
-      <form id="reviewForm" onsubmit="window.lizGlamApp.submitReview(event)">
-        <div class="form-group">
-          <label>Tu Nombre</label>
-          <input type="text" id="revUserName" class="form-control" required placeholder="Ej: Sofía M.">
-        </div>
-        <div class="form-group">
-          <label>Calificación (Estrellas)</label>
-          <select id="revRating" class="form-control">
-            <option value="5">★★★★★ (5/5)</option>
-            <option value="4">★★★★☆ (4/5)</option>
-            <option value="3">★★★☆☆ (3/5)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Título de tu Opinión</label>
-          <input type="text" id="revTitle" class="form-control" required placeholder="Ej: Me encantó el acabado!">
-        </div>
-        <div class="form-group">
-          <label>Tu Experiencia / Reseña</label>
-          <textarea id="revContent" class="form-control" rows="3" required placeholder="Escribe tu opinión..."></textarea>
-        </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-          <button type="button" onclick="document.getElementById('reviewModal').style.display = 'none'" class="btn btn-sm btn-secondary" style="flex: 1;">Cancelar</button>
-          <button type="submit" class="btn btn-sm btn-primary" style="flex: 1;">Enviar Reseña</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- Footer -->
   <footer class="footer">
